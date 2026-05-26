@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>全球支付资源导航 - PayHub</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: #f5f7fa;
+      color: #333;
+      line-height: 1.6;
+    }
+
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      color: white;
+      padding: 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.3);
+      transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .header.hide {
+      transform: translateY(-100%);
+    }
+    .header-top {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 12px 20px 0;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      overflow: hidden;
+      max-height: 60px;
+      transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .header-top.collapsed {
+      max-height: 0;
+      padding-top: 0;
+      opacity: 0;
+    }
+    .logo {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
+    .logo span { color: #00d4ff; }
+    .tagline {
+      font-size: 13px;
+      color: #8fa3bf;
+      margin-left: auto;
+    }
+
+    /* Nav */
+    .nav-wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      padding: 12px 20px;
+      transition: padding 0.35s;
+    }
+    .nav-wrap::-webkit-scrollbar { display: none; }
+    .nav-wrap.shrink {
+      padding: 6px 20px;
+    }
+    .nav {
+      display: flex;
+      gap: 6px;
+      white-space: nowrap;
+      width: max-content;
+    }
+    .nav-item {
+      padding: 6px 18px;
+      border-radius: 20px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.25s;
+      color: #c0cfdf;
+      border: 1px solid transparent;
+      flex-shrink: 0;
+    }
+    .nav-item:hover, .nav-item.active {
+      background: rgba(0, 212, 255, 0.15);
+      color: #00d4ff;
+      border-color: rgba(0,212,255,0.3);
+    }
+    .nav-item.active {
+      background: #00d4ff;
+      color: #1a1a2e;
+      font-weight: 600;
+    }
+
+    /* Search Bar */
+    .search-bar {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px 20px;
+      display: flex;
+      gap: 10px;
+      overflow: hidden;
+      max-height: 80px;
+      transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .search-bar.collapsed {
+      max-height: 0;
+      padding-top: 0;
+      padding-bottom: 0;
+      opacity: 0;
+    }
+    .search-bar input {
+      flex: 1;
+      padding: 10px 20px;
+      border-radius: 30px;
+      border: 2px solid rgba(0,212,255,0.3);
+      background: rgba(255,255,255,0.08);
+      color: white;
+      font-size: 15px;
+      outline: none;
+      transition: all 0.3s;
+    }
+    .search-bar input::placeholder { color: #6b8299; }
+    .search-bar input:focus {
+      border-color: #00d4ff;
+      background: rgba(255,255,255,0.12);
+      box-shadow: 0 0 20px rgba(0,212,255,0.15);
+    }
+    .search-bar button {
+      padding: 10px 24px;
+      border-radius: 30px;
+      border: none;
+      background: linear-gradient(135deg, #00d4ff, #0099cc);
+      color: white;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .search-bar button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 15px rgba(0,212,255,0.4);
+    }
+
+    /* Stats */
+    .stats-bar {
+      background: rgba(0,0,0,0.2);
+      border-top: 1px solid rgba(255,255,255,0.06);
+      padding: 10px 20px;
+      overflow: hidden;
+      max-height: 60px;
+      transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .stats-bar.collapsed {
+      max-height: 0;
+      padding-top: 0;
+      padding-bottom: 0;
+      border-top: none;
+    }
+    .stats-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      gap: 30px;
+      flex-wrap: wrap;
+    }
+    .stat-item {
+      font-size: 13px;
+      color: #8fa3bf;
+    }
+    .stat-item strong {
+      color: #00d4ff;
+      font-weight: 700;
+    }
+
+    /* Main Content */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 30px 20px;
+    }
+
+    /* Section Header */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .section-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #1a1a2e;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-title::before {
+      content: '';
+      width: 4px;
+      height: 22px;
+      background: linear-gradient(180deg, #00d4ff, #0099cc);
+      border-radius: 2px;
+    }
+    .filter-tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .filter-tab {
+      padding: 5px 16px;
+      border-radius: 15px;
+      font-size: 13px;
+      cursor: pointer;
+      border: 1px solid #dde2ec;
+      background: white;
+      color: #666;
+      transition: all 0.2s;
+    }
+    .filter-tab:hover, .filter-tab.active {
+      background: #1a1a2e;
+      color: #00d4ff;
+      border-color: #1a1a2e;
+    }
+
+    /* Cards Grid */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 14px;
+      padding: 20px;
+      border: 1px solid #e8ecf0;
+      transition: all 0.3s;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #00d4ff, #0099cc);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+      border-color: #00d4ff;
+    }
+    .card:hover::before { opacity: 1; }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .card-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+    .card-icon img {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      object-fit: contain;
+    }
+    .card-name {
+      font-size: 16px;
+      font-weight: 700;
+      color: #1a1a2e;
+      margin-bottom: 2px;
+    }
+    .card-name-en {
+      font-size: 12px;
+      color: #999;
+    }
+    .card-badges {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+    .badge {
+      padding: 3px 10px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .badge-region {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+    .badge-type {
+      background: #e3f2fd;
+      color: #1565c0;
+    }
+    .badge-hot {
+      background: #fff3e0;
+      color: #e65100;
+    }
+    .badge-new {
+      background: #f3e5f5;
+      color: #7b1fa2;
+    }
+    .badge-pick {
+      background: #fce4ec;
+      color: #c62828;
+    }
+    .card-desc {
+      font-size: 13px;
+      color: #666;
+      line-height: 1.7;
+      margin-bottom: 12px;
+    }
+    .card-tags {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+    .card-tag {
+      padding: 2px 8px;
+      background: #f0f2f5;
+      border-radius: 6px;
+      font-size: 11px;
+      color: #888;
+    }
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 12px;
+      border-top: 1px solid #f0f2f5;
+    }
+    .card-cat {
+      font-size: 12px;
+      color: #00d4ff;
+      font-weight: 600;
+    }
+    .card-visit {
+      font-size: 12px;
+      color: #999;
+    }
+    .card-visit:hover { color: #00d4ff; }
+
+    /* Pagination */
+    .pagination {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin: 30px 0;
+    }
+    .page-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      border: 1px solid #dde2ec;
+      background: white;
+      cursor: pointer;
+      font-size: 14px;
+      color: #666;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .page-btn:hover, .page-btn.active {
+      background: #1a1a2e;
+      color: #00d4ff;
+      border-color: #1a1a2e;
+    }
+    .page-btn.disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    /* Footer */
+    .footer {
+      background: #1a1a2e;
+      color: #6b8299;
+      padding: 40px 20px 20px;
+      margin-top: 40px;
+    }
+    .footer-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 30px;
+    }
+    .footer-brand {
+      font-size: 18px;
+      font-weight: 800;
+      color: white;
+      margin-bottom: 10px;
+    }
+    .footer-brand span { color: #00d4ff; }
+    .footer-desc {
+      font-size: 13px;
+      line-height: 1.8;
+    }
+    .footer-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 12px;
+    }
+    .footer-links {
+      list-style: none;
+    }
+    .footer-links li {
+      margin-bottom: 8px;
+    }
+    .footer-links a {
+      color: #6b8299;
+      text-decoration: none;
+      font-size: 13px;
+      transition: color 0.2s;
+    }
+    .footer-links a:hover { color: #00d4ff; }
+    .footer-bottom {
+      max-width: 1200px;
+      margin: 30px auto 0;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      text-align: center;
+      font-size: 13px;
+    }
+
+    /* Back to top */
+    .back-top {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #00d4ff, #0099cc);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 18px;
+      box-shadow: 0 4px 15px rgba(0,212,255,0.4);
+      transition: all 0.3s;
+    }
+    .back-top:hover { transform: translateY(-3px); }
+
+    /* Count badge */
+    .count-badge {
+      background: linear-gradient(135deg, #00d4ff, #0099cc);
+      color: white;
+      padding: 2px 10px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 700;
+      margin-left: 8px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .footer-inner { grid-template-columns: 1fr 1fr; }
+      .tagline { display: none; }
+      .cards-grid { grid-template-columns: 1fr; }
+    }
+
+    /* Subtle animation */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .card {
+      animation: fadeInUp 0.4s ease-out;
+    }
+    .cards-grid .card:nth-child(1) { animation-delay: 0.05s; }
+    .cards-grid .card:nth-child(2) { animation-delay: 0.08s; }
+    .cards-grid .card:nth-child(3) { animation-delay: 0.11s; }
+    .cards-grid .card:nth-child(4) { animation-delay: 0.14s; }
+    .cards-grid .card:nth-child(5) { animation-delay: 0.17s; }
+    .cards-grid .card:nth-child(6) { animation-delay: 0.20s; }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-top">
+    <div class="logo">Pay<span>Hub</span></div>
+    <div class="tagline">全球支付资源导航 · 收录 2000+ 支付平台</div>
+  </div>
+  <div class="nav-wrap">
+    <div class="nav">
+    <div class="nav-item active" data-cat="all">全部</div>
+    <div class="nav-item" data-cat="跨境支付">跨境支付</div>
+    <div class="nav-item" data-cat="信用卡收单">信用卡收单</div>
+    <div class="nav-item" data-cat="电子钱包">电子钱包</div>
+    <div class="nav-item" data-cat="银行网关">银行网关</div>
+    <div class="nav-item" data-cat="数字货币">数字货币</div>
+    <div class="nav-item" data-cat="本地支付">本地支付</div>
+    <div class="nav-item" data-cat="聚合支付">聚合支付</div>
+    <div class="nav-item" data-cat="金融科技">金融科技</div>
+    </div>
+  </div>
+  <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="搜索支付平台、公司名称或关键词..." />
+    <button onclick="doSearch()">搜索</button>
+  </div>
+  <div class="stats-bar">
+    <div class="stats-inner">
+      <div class="stat-item">收录平台 <strong>2000+</strong></div>
+      <div class="stat-item">覆盖国家 <strong>120+</strong></div>
+      <div class="stat-item">今日更新 <strong>15</strong></div>
+      <div class="stat-item">优质精选 <strong>200+</strong></div>
+    </div>
+  </div>
+</div>
+
+<!-- Content -->
+<div class="container">
+  <div class="section-header">
+    <div class="section-title">支付平台收录 <span class="count-badge" id="cardCount">100</span></div>
+    <div class="filter-tabs">
+      <div class="filter-tab active" data-filter="all">综合</div>
+      <div class="filter-tab" data-filter="hot">热门</div>
+      <div class="filter-tab" data-filter="new">最新</div>
+      <div class="filter-tab" data-filter="pick">精选</div>
+    </div>
+  </div>
+  <div class="cards-grid" id="cardsGrid"></div>
+  <div class="pagination" id="pagination"></div>
+</div>
+
+<!-- Footer -->
+<div class="footer">
+  <div class="footer-inner">
+    <div>
+      <div class="footer-brand">Pay<span>Hub</span></div>
+      <p class="footer-desc">全球支付资源导航，收录来自世界各地的支付公司、支付平台与金融科技公司。为出海商户、跨境电商、开发者提供最全的支付解决方案导航服务。</p>
+    </div>
+    <div>
+      <div class="footer-title">支付类型</div>
+      <ul class="footer-links">
+        <li><a href="#">跨境支付</a></li>
+        <li><a href="#">信用卡收单</a></li>
+        <li><a href="#">电子钱包</a></li>
+        <li><a href="#">银行转账</a></li>
+        <li><a href="#">数字货币</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-title">地区导航</div>
+      <ul class="footer-links">
+        <li><a href="#">东南亚</a></li>
+        <li><a href="#">欧洲</a></li>
+        <li><a href="#">中东非洲</a></li>
+        <li><a href="#">拉丁美洲</a></li>
+        <li><a href="#">北美</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-title">关于</div>
+      <ul class="footer-links">
+        <li><a href="#">关于我们</a></li>
+        <li><a href="#">提交收录</a></li>
+        <li><a href="#">广告合作</a></li>
+        <li><a href="#">免责声明</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    © 2026 PayHub 支付资源导航 · 仅为导航收录，不提供任何支付服务
+  </div>
+</div>
+
+<!-- Back to Top -->
+<div class="back-top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</div>
+
+<script>
+// 100个支付平台数据
+const allData = [
+  {name:"PayPal", nameEn:"PayPal", icon:"💳", cat:"跨境支付", region:"美国", desc:"全球最广泛使用的在线支付平台，支持跨境收款付款，覆盖200+国家地区。", tags:["跨境收款","在线支付","P2P转账"], flag:"hot", flags:["hot","pick"]},
+  {name:"Stripe", nameEn:"Stripe", icon:"⚡", cat:"信用卡收单", region:"美国", desc:"全球领先的开发者友好型支付API，支持信用卡、数字钱包、本地支付方式。", tags:["支付API","信用卡","订阅服务"], flag:"pick", flags:["hot","pick"]},
+  {name:"Adyen", nameEn:"Adyen", icon:"🌐", cat:"跨境支付", region:"荷兰", desc:"一站式全球支付平台，为企业提供全球收单、付款、风控一体化解决方案。", tags:["全球收单","企业支付","多币种"], flag:"hot", flags:["hot","pick"]},
+  {name:"Square", nameEn:"Square", icon:"▣", cat:"聚合支付", region:"美国", desc:"为中小企业提供线下+线上全场景支付解决方案，支持信用卡、NFC、二维码。", tags:["线下支付","POS","小额收款"], flag:"hot", flags:["hot"]},
+  {name:"Checkout.com", nameEn:"Checkout.com", icon:"🛒", cat:"信用卡收单", region:"英国", desc:"专注企业级全球支付收单，支持Visa、Mastercard及150+种本地支付方式。", tags:["全球收单","高转化率","多币种"], flag:"pick", flags:["pick"]},
+  {name:"Worldpay", nameEn:"Worldpay", icon:"🌍", cat:"跨境支付", region:"英国", desc:"全球支付技术公司，为商户和金融机构提供支付处理服务。", tags:["支付处理","卡支付","银行合作"], flag:"hot", flags:["hot"]},
+  {name:"Klarna", nameEn:"Klarna", icon:"💙", cat:"本地支付", region:"瑞典", desc:"欧洲领先的先买后付(BNPL)平台，北欧市场占有率极高。", tags:["BNPL","分期付款","欧洲"], flag:"new", flags:["new"]},
+  {name:"Payoneer", nameEn:"Payoneer", icon:"📦", cat:"跨境支付", region:"美国", desc:"全球跨境支付平台，为自由职业者和企业提供快速、安全的收款服务。", tags:["跨境收款","美元账户","自由职业"], flag:"hot", flags:["hot","pick"]},
+  {name:"Wise", nameEn:"Wise", icon:"💱", cat:"跨境支付", region:"英国", desc:"透明低费的跨境汇款平台，汇率接近中间价，用户遍布全球。", tags:["国际汇款","多币种账户","低费率"], flag:"hot", flags:["hot","pick"]},
+  {name:"Paytm", nameEn:"Paytm", icon:"📱", cat:"电子钱包", region:"印度", desc:"印度最大移动支付和金融科技平台，用户超3亿。", tags:["移动支付","印度","数字钱包"], flag:"hot", flags:["hot"]},
+  {name:"Alipay", nameEn:"Alipay", icon:"🐜", cat:"电子钱包", region:"中国", desc:"蚂蚁集团旗下全球领先第三方支付平台，国内覆盖率最高的移动支付工具。", tags:["移动支付","中国","二维码"], flag:"hot", flags:["hot","pick"]},
+  {name:"WeChat Pay", nameEn:"WeChat Pay", icon:"💬", cat:"电子钱包", region:"中国", desc:"微信支付，集成于微信生态的移动支付服务，覆盖超9亿用户。", tags:["移动支付","微信生态","二维码"], flag:"hot", flags:["hot"]},
+  {name:"Mercado Pago", nameEn:"Mercado Pago", icon:"🌎", cat:"本地支付", region:"阿根廷", desc:"拉丁美洲电商巨头MercadoLibre的支付服务，覆盖整个拉美市场。", tags:["拉美","电商支付","本地支付"], flag:"pick", flags:["pick"]},
+  {name:"Razorpay", nameEn:"Razorpay", icon:"⚡", cat:"聚合支付", region:"印度", desc:"印度领先支付网关，为企业提供标准化支付接入解决方案。", tags:["支付网关","印度","订阅"], flag:"new", flags:["new","pick"]},
+  {name:"2Checkout", nameEn:"2Checkout", icon:"2C", cat:"信用卡收单", region:"美国", desc:"全球支付收单平台，现更名为Verifone Channel，成功率高。", tags:["全球收单","数字商品","高转化"], flag:"hot", flags:["hot"]},
+  {name:"Braintree", nameEn:"Braintree", icon:"🧠", cat:"信用卡收单", region:"美国", desc:"PayPal旗下支付平台，以统一商务API著称，全球商户广泛使用。", tags:["PayPal生态","信用卡","API支付"], flag:"hot", flags:["hot"]},
+  {name:"Skrill", nameEn:"Skrill", icon:"💸", cat:"电子钱包", region:"英国", desc:"全球在线支付钱包，支持40+币种，专注游戏和电商领域。", tags:["数字钱包","游戏支付","国际汇款"], flag:"pick", flags:["pick"]},
+  {name:"Neteller", nameEn:"Neteller", cat:"电子钱包", region:"英国", desc:"加拿大Payments机构旗下的数字钱包，全球数百万用户。", tags:["数字钱包","在线游戏","预付卡"], flag:"pick", flags:["pick"]},
+  {name:"ecoPayz", nameEn:"ecoPayz", icon:"🌿", cat:"电子钱包", region:"英国", desc:"全球多货币电子钱包，支持50+种货币，提供预付万事达卡。", tags:["多币种","预付卡","全球收款"], flag:"new", flags:["new"]},
+  {name:"Muchbetter", nameEn:"Muchbetter", icon:"📲", cat:"电子钱包", region:"英国", desc:"创新型移动支付应用，以手势认证和动态CVC著称。", tags:["移动支付","安全认证","多设备"], flag:"new", flags:["new"]},
+  {name:"Stripe Atlas", nameEn:"Stripe Atlas", icon:"🏢", cat:"金融科技", region:"美国", desc:"Stripe旗下企业注册服务，助你快速注册美国/香港公司并开设银行账户。", tags:["公司注册","美国公司","银行账户"], flag:"pick", flags:["pick","new"]},
+  {name:"Airwallex", nameEn:"Airwallex", icon:"✈️", cat:"跨境支付", region:"澳大利亚", desc:"全球金融科技公司，提供跨境支付、企业卡、汇率管理服务。", tags:["跨境支付","多币种","企业卡"], flag:"hot", flags:["hot","pick"]},
+  {name:"PingPong", nameEn:"PingPong", icon:"🏓", cat:"跨境支付", region:"中国", desc:"中国跨境支付品牌，为出口电商提供一站式跨境金融服务。", tags:["跨境电商","收款","结汇"], flag:"hot", flags:["hot"]},
+  {name:"连连国际", nameEn:"LianLian Global", icon:"🔗", cat:"跨境支付", region:"中国", desc:"国内知名跨境支付服务商，合规资质齐全，服务跨境电商。", tags:["跨境收款","结汇","跨境电商"], flag:"hot", flags:["hot"]},
+  {name:"WorldFirst", nameEn:"WorldFirst", icon:"🌍", cat:"跨境支付", region:"英国", desc:"蚂蚁集团旗下跨境支付服务，覆盖全球主要电商平台收款。", tags:["跨境收款","电商平台","多币种"], flag:"pick", flags:["pick"]},
+  {name:"Payoneer派安盈", nameEn:"Payoneer", icon:"📦", cat:"跨境支付", region:"美国", desc:"全球跨境支付平台，服务百万企业和自由职业者。", tags:["美元账户","电商收款","自由职业"], flag:"hot", flags:["hot"]},
+  {name:"XTransfer", nameEn:"XTransfer", icon:"📊", cat:"跨境支付", region:"中国", desc:"专注B2B跨境支付，为中小外贸企业提供开卡、收款结汇服务。", tags:["B2B支付","外贸收款","结汇"], flag:"new", flags:["new"]},
+  {name:"寻汇", nameEn:"Windhorne", icon:"💨", cat:"跨境支付", region:"中国", desc:"数字化跨境支付平台，为企业提供汇率管理和跨境支付解决方案。", tags:["汇率管理","跨境支付","企业服务"], flag:"new", flags:["new"]},
+  {name:"网易支付", nameEn:"Wangyi Pay", icon:"🎮", cat:"聚合支付", region:"中国", desc:"网易集团旗下第三方支付平台，提供支付结算、资金管理服务。", tags:["国内支付","游戏支付","聚合支付"], flag:"pick", flags:["pick"]},
+  {name:"汇付天下", nameEn:"Huifu", icon:"💰", cat:"聚合支付", region:"中国", desc:"中国领先第三方支付公司，港股上市，为商户提供支付解决方案。", tags:["第三方支付","聚合支付","SaaS"], flag:"hot", flags:["hot"]},
+  {name:"随行付", nameEn:"Suixingpay", icon:"📲", cat:"聚合支付", region:"中国", desc:"国内知名聚合支付品牌，专注小微商户收单服务。", tags:["聚合支付","小微商户","线下收单"], flag:"hot", flags:["hot"]},
+  {name:"拉卡拉", nameEn:"Lakala", icon:"💳", cat:"聚合支付", region:"中国", desc:"国内头部第三方支付机构，提供收单、智能支付终端服务。", tags:["收单","智能POS","线下支付"], flag:"hot", flags:["hot"]},
+  {name:"乐刷", nameEn:"Leshua", icon:"🎯", cat:"聚合支付", region:"中国", desc:"移动支付公司，旗下有多款收单产品，覆盖餐饮、零售等行业。", tags:["移动支付","收单","行业解决方案"], flag:"pick", flags:["pick"]},
+  {name:"合利宝", nameEn:"Helibao", icon:"🔒", cat:"聚合支付", region:"中国", desc:"中国支付机构会员单位，提供聚合支付、行业解决方案服务。", tags:["聚合支付","行业解决方案","跨境支付"], flag:"new", flags:["new"]},
+  {name:"银联商务", nameEn:"ChinaPnR", icon:"🏦", cat:"银行网关", region:"中国", desc:"银联旗下最大收单机构，为商户提供全场景支付收单服务。", tags:["银联","收单","线下支付"], flag:"hot", flags:["hot"]},
+  {name:"银联在线", nameEn:"ChinaUnionPay", icon:"💳", cat:"银行网关", region:"中国", desc:"银联官方在线支付平台，支持银联卡线上支付。", tags:["银联","在线支付","银行卡"], flag:"hot", flags:["hot"]},
+  {name:"Nexi", nameEn:"Nexi", icon:"💳", cat:"信用卡收单", region:"意大利", desc:"意大利领先支付服务提供商，欧洲上市公司。", tags:["欧洲","收单","POS"], flag:"pick", flags:["pick"]},
+  {name:"Clearhaus", nameEn:"Clearhaus", icon:"🏠", cat:"信用卡收单", region:"丹麦", desc:"丹麦支付服务商，为欧洲电商提供Visa和Mastercard收单。", tags:["欧洲","信用卡","高风险行业"], flag:"new", flags:["new"]},
+  {name:"Bunq", nameEn:"Bunq", icon:"🌳", cat:"银行网关", region:"荷兰", desc:"荷兰最大移动银行，无传统网点，全APP操作，支持多 IBAN。", tags:["移动银行","IBAN","欧盟"], flag:"pick", flags:["pick"]},
+  {name:"N26", nameEn:"N26", icon:"🏦", cat:"银行网关", region:"德国", desc:"德国移动银行，欧盟全牌照，支持欧洲各国IBAN账户。", tags:["移动银行","欧盟","多币种"], flag:"hot", flags:["hot"]},
+  {name:"Monzo", nameEn:"Monzo", icon:"🟠", cat:"银行网关", region:"英国", desc:"英国知名挑战者银行，全APP操作，为个人和商业用户提供服务。", tags:["挑战者银行","英国","APP银行"], flag:"hot", flags:["hot"]},
+  {name:"Revolut", nameEn:"Revolut", icon:"🔴", cat:"跨境支付", region:"英国", desc:"英国金融超级应用，提供汇款、货币兑换、加密货币、预付卡服务。", tags:["汇款","多币种","加密货币"], flag:"hot", flags:["hot","pick"]},
+  {name:"TransferWise", nameEn:"TransferWise", icon:"💱", cat:"跨境支付", region:"英国", desc:"透明低费的国际汇款平台，现更名为Wise，品牌全面升级。", tags:["国际汇款","中间价汇率","多币种"], flag:"hot", flags:["hot"]},
+  {name:"Paysera", nameEn:"Paysera", icon:"🌍", cat:"跨境支付", region:"立陶宛", desc:"东欧领先的电子支付平台，支持欧洲多国付款和收款。", tags:["东欧","电子支付","多币种"], flag:"pick", flags:["pick"]},
+  {name:"Currencies Direct", nameEn:"Currencies Direct", icon:"💵", cat:"跨境支付", region:"英国", desc:"专注B2B跨境支付和风险管理，服务全球企业客户。", tags:["B2B","汇率管理","风险管理"], flag:"pick", flags:["pick"]},
+  {name:"Euronet", nameEn:"Euronet", icon:"💶", cat:"跨境支付", region:"美国", desc:"全球支付和交易处理服务商，业务覆盖ATM和商户收单。", tags:["ATM","收单","跨境汇款"], flag:"new", flags:["new"]},
+  {name:"BitPay", nameEn:"BitPay", icon:"₿", cat:"数字货币", region:"美国", desc:"全球领先的比特币支付服务商，支持BTC、BCH等加密货币支付。", tags:["比特币","加密支付","区块链"], flag:"hot", flags:["hot"]},
+  {name:"Coinbase Commerce", nameEn:"Coinbase Commerce", icon:"🪙", cat:"数字货币", region:"美国", desc:"Coinbase旗下加密货币支付解决方案，支持多种主流加密货币。", tags:["加密货币","电商支付","多币种"], flag:"hot", flags:["hot","pick"]},
+  {name:"Paxful", nameEn:"Paxful", icon:"🤝", cat:"数字货币", region:"美国", desc:"全球P2P比特币市场，用户可直接买卖BTC，支持100+支付方式。", tags:["P2P","比特币","OTC"], flag:"pick", flags:["pick"]},
+  {name:"Coinpayments", nameEn:"Coinpayments", icon:"🛡️", cat:"数字货币", region:"加拿大", desc:"支持1850+种加密货币的支付网关，广泛应用于电商和捐赠。", tags:["加密支付网关","多币种","API接入"], flag:"new", flags:["new"]},
+  {name:"NowPayments", nameEn:"NowPayments", icon:"⚡", cat:"数字货币", region:"爱沙尼亚", desc:"支持100+加密货币的支付处理服务，提供自动兑换为法币功能。", tags:["加密货币","自动兑换","低费率"], flag:"new", flags:["new"]},
+  {name:"GoPay", nameEn:"GoPay", icon:"🟢", cat:"本地支付", region:"印尼", desc:"印尼电商Gojek旗下支付平台，印尼最流行的电子钱包之一。", tags:["印尼","电子钱包","本地支付"], flag:"hot", flags:["hot"]},
+  {name:"OVO", nameEn:"OVO", icon:"💚", cat:"本地支付", region:"印尼", desc:"印尼领先数字支付和金融服务平台，用户数过亿。", tags:["印尼","数字支付","金融服务"], flag:"hot", flags:["hot"]},
+  {name:"DANA", nameEn:"DANA", icon:"💧", cat:"本地支付", region:"印尼", desc:"印尼数字钱包，由蚂蚁集团战略投资，在印尼市场快速扩张。", tags:["印尼","数字钱包","扫码支付"], flag:"new", flags:["new"]},
+  {name:"DOKU", nameEn:"DOKU", icon:"📋", cat:"本地支付", region:"印尼", desc:"印尼本地支付网关，支持多种本地支付方式。", tags:["印尼","支付网关","本地方式"], flag:"pick", flags:["pick"]},
+  {name:"Deezer", nameEn:"Deezer", icon:"🎵", cat:"金融科技", region:"法国", desc:"欧洲音乐流媒体平台（仅作分类示例），支持多种支付订阅。", tags:["订阅服务","欧洲","音乐"], flag:"new", flags:["new"]},
+  {name:"GrabPay", nameEn:"GrabPay", icon:"🚗", cat:"本地支付", region:"新加坡", desc:"东南亚超级应用Grab的支付功能，覆盖新加坡、马来西亚等多国。", tags:["东南亚","超级应用","电子钱包"], flag:"hot", flags:["hot"]},
+  {name:"Boost", nameEn:"Boost", icon:"🚀", cat:"本地支付", region:"马来西亚", desc:"马来西亚本土电子钱包，与多品牌合作提供支付和积分服务。", tags:["马来西亚","电子钱包","本地商户"], flag:"pick", flags:["pick"]},
+  {name:"Touch'n Go", nameEn:"Touch'n Go", icon:"🚇", cat:"本地支付", region:"马来西亚", desc:"马来西亚交通卡及电子钱包，支持高速收费、公交及零售消费。", tags:["马来西亚","交通卡","电子钱包"], flag:"new", flags:["new"]},
+  {name:"LINE Pay", nameEn:"LINE Pay", icon:"💬", cat:"电子钱包", region:"日本", desc:"日本LINE通讯软件内置支付功能，覆盖日本及部分亚洲地区。", tags:["日本","LINE生态","移动支付"], flag:"hot", flags:["hot"]},
+  {name:"PayPay", nameEn:"PayPay", icon:"📱", cat:"本地支付", region:"日本", desc:"日本最大移动支付应用，由软银和支付宝合作推出，用户超4000万。", tags:["日本","二维码支付","大型商户"], flag:"hot", flags:["hot","pick"]},
+  {name:"Origami Pay", nameEn:"Origami Pay", icon:"🎋", cat:"本地支付", region:"日本", desc:"日本移动支付公司，服务日本本地商户和消费者。", tags:["日本","移动支付","商户接入"], flag:"pick", flags:["pick"]},
+  {name:"Naver Pay", nameEn:"Naver Pay", icon:"🔍", cat:"电子钱包", region:"韩国", desc:"韩国Naver搜索引擎内置支付功能，韩国主流在线支付之一。", tags:["韩国","NAVER生态","在线支付"], flag:"hot", flags:["hot"]},
+  {name:"Kakao Pay", nameEn:"Kakao Pay", icon:"💬", cat:"电子钱包", region:"韩国", desc:"韩国Kakao Talk内置支付，与支付宝深度合作，国际化程度高。", tags:["韩国","Kakao生态","跨境支付"], flag:"hot", flags:["hot"]},
+  {name:"Samsung Pay", nameEn:"Samsung Pay", icon:"📱", cat:"本地支付", region:"韩国", desc:"三星手机内置支付，支持NFC和MST，覆盖全球多个国家。", tags:["NFC","MST","三星生态"], flag:"hot", flags:["hot"]},
+  {name:"Toss", nameEn:"Toss", icon:"💰", cat:"金融科技", region:"韩国", desc:"韩国金融科技独角兽，提供支付、转账、贷款、信用评分等服务。", tags:["韩国","金融科技","超级应用"], flag:"hot", flags:["hot","pick"]},
+  {name:"Kakaopay", nameEn:"Kakao Pay", icon:"💛", cat:"电子钱包", region:"韩国", desc:"韩国Kakao集团旗下支付平台，KakaoTalk官方支付工具。", tags:["韩国","KakaoTalk","数字支付"], flag:"hot", flags:["hot"]},
+  {name:"TrueMoney", nameEn:"TrueMoney", icon:"💵", cat:"本地支付", region:"泰国", desc:"泰国领先电子钱包，由蚂蚁集团战略投资，覆盖泰国、越南等多国。", tags:["泰国","电子钱包","东南亚"], flag:"hot", flags:["hot"]},
+  {name:"LINE Pay TW", nameEn:"LINE Pay 台灣", icon:"💚", cat:"本地支付", region:"台湾", desc:"LINE Pay台湾版，与多个台湾银行合作，支持LINE Points积分。", tags:["台湾","LINE","移动支付"], flag:"pick", flags:["pick"]},
+  {name:"街口支付", nameEn:"JKOPAY", icon:"🏙️", cat:"本地支付", region:"台湾", desc:"台湾本土移动支付龙头，覆盖台湾线下零售、餐饮等场景。", tags:["台湾","移动支付","本地商户"], flag:"hot", flags:["hot"]},
+  {name:"Pi Pay", nameEn:"Pi Pay", icon:"🥧", cat:"本地支付", region:"柬埔寨", desc:"柬埔寨本土移动支付应用，专注东南亚新兴市场。", tags:["柬埔寨","移动支付","本地"], flag:"new", flags:["new"]},
+  {name:"Moca", nameEn:"Moca", icon:"☕", cat:"本地支付", region:"越南", desc:"越南本土支付网关，服务越南本地餐饮和零售商户。", tags:["越南","本地支付","餐饮"], flag:"pick", flags:["pick"]},
+  {name:"ZaloPay", nameEn:"ZaloPay", icon:"💬", cat:"本地支付", region:"越南", desc:"越南社交应用Zalo内置支付，越南用户量最大的社交支付工具。", tags:["越南","Zalo生态","移动支付"], flag:"hot", flags:["hot"]},
+  {name:"MoMo", nameEn:"MoMo", icon:"🔴", cat:"本地支付", region:"越南", desc:"越南最大移动支付平台，用户超2500万，覆盖多种支付场景。", tags:["越南","移动支付","数字钱包"], flag:"hot", flags:["hot","pick"]},
+  {name:"VNPay", nameEn:"VNPay", icon:"🇻🇳", cat:"本地支付", region:"越南", desc:"越南最大支付网关，支持银行转账、电子钱包、扫码等多种方式。", tags:["越南","支付网关","银行转账"], flag:"hot", flags:["hot"]},
+  {name:"Payoo", nameEn:"Payoo", icon:"📦", cat:"本地支付", region:"越南", desc:"越南本地支付平台，提供钱包、账单支付等多种服务。", tags:["越南","账单支付","电子钱包"], flag:"pick", flags:["pick"]},
+  {name:"AlipayHK", nameEn:"AlipayHK", icon:"🐜", cat:"电子钱包", region:"香港", desc:"支付宝香港版，服务香港本地用户，接入多国商户。", tags:["香港","电子钱包","跨境支付"], flag:"hot", flags:["hot"]},
+  {name:"WeChat Pay HK", nameEn:"WeChat Pay HK", icon:"💚", cat:"电子钱包", region:"香港", desc:"微信支付香港版，服务香港用户，支持跨境付款。", tags:["香港","微信","移动支付"], flag:"hot", flags:["hot"]},
+  {name:"Tap&Go", nameEn:"Tap&Go", icon:"👆", cat:"电子钱包", region:"香港", desc:"香港本地预付电子钱包，支持拍卡支付和流动支付。", tags:["香港","预付卡","NFC"], flag:"pick", flags:["pick"]},
+  {name:"BoC Pay", nameEn:"BoC Pay", icon:"🏦", cat:"本地支付", region:"香港", desc:"中国银行香港电子钱包，支持跨境二维码支付。", tags:["香港","银行系","二维码"], flag:"new", flags:["new"]},
+  {name:"八达通O!", nameEn:"Octopus O", icon:"🟠", cat:"本地支付", region:"香港", desc:"香港八达通App版，除交通外支持多场景零售支付。", tags:["香港","八达通","交通卡"], flag:"pick", flags:["pick"]},
+  {name:"MPay", nameEn:"MPay", icon:"💙", cat:"本地支付", region:"澳门", desc:"澳门最大移动支付平台，由澳门通推出，覆盖澳门各类商户。", tags:["澳门","移动支付","本地"], flag:"hot", flags:["hot"]},
+  {name:"PayMe", nameEn:"PayMe", icon:"💚", cat:"本地支付", region:"香港", desc:"汇丰银行旗下P2P支付应用，香港用户量可观的社交支付。", tags:["香港","HSBC","P2P支付"], flag:"hot", flags:["hot"]},
+  {name:"FPS", nameEn:"Faster Payment", icon:"⚡", cat:"银行网关", region:"香港", desc:"香港快速支付系统，24/7即时跨行转账，支持手机号/邮箱转账。", tags:["香港","即时转账","FPS"], flag:"hot", flags:["hot"]},
+  {name:"UnionPay国际", nameEn:"UnionPay International", icon:"🌏", cat:"银行网关", region:"中国", desc:"银联国际，全球受理网络覆盖180+国家和地区。", tags:["银联","国际","全球受理"], flag:"hot", flags:["hot","pick"]},
+  {name:"Visa Direct", nameEn:"Visa Direct", icon:"💳", cat:"跨境支付", region:"美国", desc:"Visa实时支付网络，支持P2P汇款和商户快速结算。", tags:["Visa","实时支付","快速结算"], flag:"pick", flags:["pick"]},
+  {name:"Mastercard Send", nameEn:"Mastercard Send", icon:"💳", cat:"跨境支付", region:"美国", desc:"万事达卡实时汇款服务，支持跨境P2P和B2B付款。", tags:["万事达","实时汇款","跨境"], flag:"pick", flags:["pick"]},
+  {name:"OpenPayd", nameEn:"OpenPayd", icon:"🔓", cat:"金融科技", region:"英国", desc:"为金融科技公司提供银行即服务(BaaS)、支付和资金管理API。", tags:["BaaS","支付API","金融科技"], flag:"new", flags:["new"]},
+  {name:"Modulr", nameEn:"Modulr", icon:"🧩", cat:"金融科技", region:"英国", desc:"英国嵌入式支付平台，为企业提供支付账户和自动化支付解决方案。", tags:["嵌入式支付","API","英国"], flag:"new", flags:["new"]},
+  {name:"Plaid", nameEn:"Plaid", icon:"🔗", cat:"金融科技", region:"美国", desc:"全球领先的开放银行数据平台，连接用户银行账户与应用。", tags:["开放银行","账户连接","API"], flag:"hot", flags:["hot","pick"]},
+  {name:"Rapyd", nameEn:"Rapyd", icon:"🌐", cat:"金融科技", region:"美国", desc:"全球支付即服务平台，覆盖100+国家本地支付方式。", tags:["全球支付","本地支付","API"], flag:"hot", flags:["hot","pick"]},
+  {name:"MFS Asia", nameEn:"MFS Asia", icon:"🌏", cat:"跨境支付", region:"新加坡", desc:"专注亚太地区跨境汇款和支付清算服务。", tags:["亚太","跨境汇款","清算"], flag:"pick", flags:["pick"]},
+  {name:"Flip", nameEn:"Flip", icon:"💸", cat:"跨境支付", region:"印尼", desc:"印尼B2B跨境支付平台，提供透明低费的印尼盾国际汇款。", tags:["印尼","B2B","低费率"], flag:"new", flags:["new"]},
+  {name:"Currencycloud", nameEn:"Currencycloud", icon:"☁️", cat:"跨境支付", region:"英国", desc:"Visa旗下跨境支付平台，为企业提供多币种账户和汇率服务。", tags:["多币种","汇率","企业支付"], flag:"pick", flags:["pick"]},
+  {name:"Blackhawk Network", nameEn:"Blackhawk Network", icon:"🦅", cat:"聚合支付", region:"美国", desc:"全球预付卡和数字支付网络，提供礼卡和数字礼品解决方案。", tags:["预付卡","礼卡","数字支付"], flag:"pick", flags:["pick"]},
+  {name:"Ingenico", nameEn:"Ingenico", icon:"🖥️", cat:"聚合支付", region:"法国", desc:"全球支付终端设备和服务提供商，现属于Worldline集团。", tags:["支付终端","POS","硬件"], flag:"hot", flags:["hot"]},
+  {name:"Verifone", nameEn:"Verifone", icon:"💳", cat:"聚合支付", region:"美国", desc:"全球支付终端和解决方案领导者，为商户提供硬件+软件服务。", tags:["支付终端","硬件","商户服务"], flag:"hot", flags:["hot"]},
+  {name:"Sumsub", nameEn:"Sumsub", icon:"🛡️", cat:"金融科技", region:"塞浦路斯", desc:"AI驱动KYC/AML身份验证和欺诈预防平台，覆盖全球用户。", tags:["KYC","AML","身份验证"], flag:"new", flags:["new"]},
+  {name:"Onfido", nameEn:"Onfido", icon:"🔐", cat:"金融科技", region:"英国", desc:"全球数字身份验证公司，提供AI驱动的身份文件和人脸验证。", tags:["身份验证","人脸识别","KYC"], flag:"hot", flags:["hot"]},
+  {name:"SumUp", nameEn:"SumUp", icon:"📠", cat:"聚合支付", region:"英国", desc:"欧洲中小企业支付解决方案，提供读卡器和POS服务。", tags:["中小企业","读卡器","欧洲"], flag:"hot", flags:["hot"]},
+  {name:"QFPay", nameEn:"QFPay", icon:"💰", cat:"聚合支付", region:"香港", desc:"亚洲领先的聚合支付服务商，为商户提供多渠道支付接入。", tags:["聚合支付","亚洲","多渠道"], flag:"hot", flags:["hot"]},
+  {name:"2C2P", nameEn:"2C2P", icon:"🔄", cat:"聚合支付", region:"新加坡", desc:"东南亚支付网关，收录亚洲各国家本地支付方式。", tags:["东南亚","支付网关","本地方式"], flag:"pick", flags:["pick"]},
+  {name:"MyCash", nameEn:"MyCash", icon:"💴", cat:"跨境支付", region:"马来西亚", desc:"专注东南亚与中东跨境汇款平台，服务外籍劳工汇款需求。", tags:["汇款","外籍劳工","东南亚"], flag:"new", flags:["new"]},
+  {name:"PayG", nameEn:"PayG", icon:"🌐", cat:"聚合支付", region:"新加坡", desc:"东南亚聚合支付平台，支持GrabPay、Boost等本地支付。", tags:["东南亚","聚合","本地支付"], flag:"pick", flags:["pick"]},
+  {name:"Nuvei", nameEn:"Nuvei", icon:"🌍", cat:"信用卡收单", region:"加拿大", desc:"加拿大支付技术公司，为全球商户提供收单和支付处理服务。", tags:["全球收单","信用卡","支付处理"], flag:"hot", flags:["hot"]},
+];
+
+// State
+let currentCat = 'all';
+let currentFilter = 'all';
+let currentPage = 1;
+const perPage = 12;
+
+// Badge colors
+const regionColors = {
+  '美国': '#e3f2fd:#1565c0', '英国': '#fce4ec:#c62828', '荷兰': '#f3e5f5:#7b1fa2',
+  '中国': '#ffebee:#c62828', '瑞典': '#e8f5e9:#2e7d32', '澳大利亚': '#e3f2fd:#1565c0',
+  '印度': '#fff3e0:#e65100', '日本': '#fce4ec:#c62828', '韩国': '#e8f5e9:#2e7d32',
+  '香港': '#fff3e0:#e65100', '台湾': '#f3e5f5:#7b1fa2', '新加坡': '#e8f5e9:#2e7d32',
+  '印尼': '#e3f2fd:#1565c0', '泰国': '#fce4ec:#c62828', '越南': '#fff3e0:#e65100',
+  '马来西亚': '#e8f5e9:#2e7d32', '德国': '#f3e5f5:#7b1fa2', '法国': '#e3f2fd:#1565c0',
+  '意大利': '#fce4ec:#c62828', '丹麦': '#e8f5e9:#2e7d32', '加拿大': '#e3f2fd:#1565c0',
+  '立陶宛': '#fff3e0:#e65100', '爱沙尼亚': '#e8f5e9:#2e7d32', '柬埔寨': '#f3e5f5:#7b1fa2',
+  '阿根廷': '#e3f2fd:#1565c0', '塞浦路斯': '#fff3e0:#e65100', '澳门': '#fce4ec:#c62828'
+};
+
+function getBadgeStyle(region) {
+  const colors = regionColors[region] || '#f0f2f5:#666';
+  const [bg, text] = colors.split(':');
+  return `background:${bg};color:${text}`;
+}
+
+function filterData() {
+  let data = allData;
+  if (currentCat !== 'all') {
+    data = data.filter(d => d.cat === currentCat);
+  }
+  if (currentFilter === 'hot') data = data.filter(d => d.flags.includes('hot'));
+  else if (currentFilter === 'new') data = data.filter(d => d.flags.includes('new'));
+  else if (currentFilter === 'pick') data = data.filter(d => d.flags.includes('pick'));
+  return data;
+}
+
+function renderCards(page) {
+  const filtered = filterData();
+  const start = (page - 1) * perPage;
+  const end = start + perPage;
+  const pageData = filtered.slice(start, end);
+
+  const grid = document.getElementById('cardsGrid');
+  grid.innerHTML = pageData.map(d => `
+    <div class="card" onclick="location.href='#'">
+      <div class="card-header">
+        <div class="card-icon">${d.icon}</div>
+        <div>
+          <div class="card-name">${d.name}</div>
+          <div class="card-name-en">${d.nameEn || ''}</div>
+        </div>
+      </div>
+      <div class="card-badges">
+        <span class="badge" style="${getBadgeStyle(d.region)}">${d.region}</span>
+        <span class="badge badge-type">${d.cat}</span>
+        ${d.flags.includes('hot') ? '<span class="badge badge-hot">🔥热门</span>' : ''}
+        ${d.flags.includes('new') ? '<span class="badge badge-new">✨新收录</span>' : ''}
+        ${d.flags.includes('pick') ? '<span class="badge badge-pick">⭐精选</span>' : ''}
+      </div>
+      <div class="card-desc">${d.desc}</div>
+      <div class="card-tags">
+        ${d.tags.map(t => `<span class="card-tag">${t}</span>`).join('')}
+      </div>
+      <div class="card-footer">
+        <span class="card-cat">📂 ${d.cat}</span>
+        <span class="card-visit">访问 →</span>
+      </div>
+    </div>
+  `).join('');
+
+  document.getElementById('cardCount').textContent = filtered.length;
+  renderPagination(filtered.length, page);
+}
+
+function renderPagination(total, page) {
+  const totalPages = Math.ceil(total / perPage);
+  const pagEl = document.getElementById('pagination');
+  if (totalPages <= 1) { pagEl.innerHTML = ''; return; }
+
+  let html = `<div class="page-btn ${page===1?'disabled':''}" onclick="goPage(${page-1})">‹</div>`;
+  for (let i = 1; i <= totalPages; i++) {
+    if (i === 1 || i === totalPages || (i >= page - 1 && i <= page + 1)) {
+      html += `<div class="page-btn ${i===page?'active':''}" onclick="goPage(${i})">${i}</div>`;
+    } else if (i === page - 2 || i === page + 2) {
+      html += `<div class="page-btn" style="border:none;cursor:default">…</div>`;
+    }
+  }
+  html += `<div class="page-btn ${page===totalPages?'disabled':''}" onclick="goPage(${page+1})">›</div>`;
+  pagEl.innerHTML = html;
+}
+
+function goPage(p) {
+  const total = filterData().length;
+  const totalPages = Math.ceil(total / perPage);
+  if (p < 1 || p > totalPages) return;
+  currentPage = p;
+  renderCards(p);
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+// Nav events
+document.querySelectorAll('.nav-item').forEach(el => {
+  el.addEventListener('click', () => {
+    document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
+    el.classList.add('active');
+    currentCat = el.dataset.cat;
+    currentPage = 1;
+    renderCards(1);
+  });
+});
+
+// Filter tabs
+document.querySelectorAll('.filter-tab').forEach(el => {
+  el.addEventListener('click', () => {
+    document.querySelectorAll('.filter-tab').forEach(x => x.classList.remove('active'));
+    el.classList.add('active');
+    currentFilter = el.dataset.filter;
+    currentPage = 1;
+    renderCards(1);
+  });
+});
+
+// Search
+function doSearch() {
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  if (!q) { renderCards(1); return; }
+  const filtered = allData.filter(d =>
+    d.name.toLowerCase().includes(q) ||
+    (d.nameEn && d.nameEn.toLowerCase().includes(q)) ||
+    d.desc.toLowerCase().includes(q) ||
+    d.cat.toLowerCase().includes(q) ||
+    d.tags.some(t => t.toLowerCase().includes(q))
+  );
+  const grid = document.getElementById('cardsGrid');
+  document.getElementById('cardCount').textContent = filtered.length;
+  grid.innerHTML = filtered.length ? filtered.map(d => `
+    <div class="card" onclick="location.href='#'">
+      <div class="card-header">
+        <div class="card-icon">${d.icon}</div>
+        <div>
+          <div class="card-name">${d.name}</div>
+          <div class="card-name-en">${d.nameEn || ''}</div>
+        </div>
+      </div>
+      <div class="card-badges">
+        <span class="badge" style="${getBadgeStyle(d.region)}">${d.region}</span>
+        <span class="badge badge-type">${d.cat}</span>
+        ${d.flags.includes('hot') ? '<span class="badge badge-hot">🔥热门</span>' : ''}
+        ${d.flags.includes('new') ? '<span class="badge badge-new">✨新收录</span>' : ''}
+        ${d.flags.includes('pick') ? '<span class="badge badge-pick">⭐精选</span>' : ''}
+      </div>
+      <div class="card-desc">${d.desc}</div>
+      <div class="card-tags">
+        ${d.tags.map(t => `<span class="card-tag">${t}</span>`).join('')}
+      </div>
+      <div class="card-footer">
+        <span class="card-cat">📂 ${d.cat}</span>
+        <span class="card-visit">访问 →</span>
+      </div>
+    </div>
+  `).join('') : '<div style="grid-column:1/-1;text-align:center;padding:60px;color:#999;font-size:15px">未找到匹配结果，请尝试其他关键词</div>';
+  document.getElementById('pagination').innerHTML = '';
+}
+
+document.getElementById('searchInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doSearch();
+});
+
+// Init
+renderCards(1);
+
+// 顶部导航滚动收缩
+const header = document.querySelector('.header');
+const headerTop = document.querySelector('.header-top');
+const navWrap = document.querySelector('.nav-wrap');
+const searchBar = document.querySelector('.search-bar');
+const statsBar = document.querySelector('.stats-bar');
+
+let lastScroll = 0;
+const scrollThreshold = 120;
+
+window.addEventListener('scroll', () => {
+  const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
+
+  if (currentScroll > scrollThreshold) {
+    // 向下滚：隐藏顶部和统计栏
+    if (currentScroll > lastScroll) {
+      headerTop.classList.add('collapsed');
+      searchBar.classList.add('collapsed');
+      statsBar.classList.add('collapsed');
+      navWrap.classList.add('shrink');
+    } else {
+      // 向上滚：恢复
+      headerTop.classList.remove('collapsed');
+      searchBar.classList.remove('collapsed');
+      statsBar.classList.remove('collapsed');
+      navWrap.classList.remove('shrink');
+    }
+  } else {
+    // 顶部区域：全显示
+    headerTop.classList.remove('collapsed');
+    searchBar.classList.remove('collapsed');
+    statsBar.classList.remove('collapsed');
+    navWrap.classList.remove('shrink');
+  }
+
+  lastScroll = currentScroll <= 0 ? 0 : currentScroll;
+}, { passive: true });
+</script>
+</body>
+</html>

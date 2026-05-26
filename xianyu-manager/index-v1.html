@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>闲鱼自动运营助手 v1.0</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: #f5f6fa;
+      color: #333;
+    }
+    
+    .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+    
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 30px;
+      border-radius: 12px;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+    .header h1 { font-size: 28px; margin-bottom: 8px; }
+    .header p { opacity: 0.9; font-size: 14px; }
+    
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .tab {
+      padding: 12px 28px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s;
+      background: white;
+      color: #666;
+      border: 2px solid transparent;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .tab:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .tab.active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    
+    /* Card */
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #1a1d29;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #f0f0f0;
+    }
+    
+    /* Auto Reply Section */
+    .rule-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px;
+      background: #f8f9fa;
+      border-radius: 10px;
+      margin-bottom: 12px;
+      border-left: 4px solid #667eea;
+    }
+    .rule-item .keyword {
+      font-weight: 600;
+      color: #667eea;
+      min-width: 120px;
+    }
+    .rule-item .reply {
+      flex: 1;
+      color: #555;
+    }
+    .rule-item .actions { display: flex; gap: 8px; }
+    
+    /* Form Elements */
+    input, textarea, select {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e8ecf0;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+    }
+    
+    /* Buttons */
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(102,126,234,0.4); }
+    .btn-success {
+      background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+      color: white;
+    }
+    .btn-success:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(56,239,125,0.4); }
+    .btn-danger {
+      background: #ef4444;
+      color: white;
+    }
+    .btn-danger:hover { background: #dc2626; }
+    .btn-sm { padding: 6px 14px; font-size: 13px; }
+    
+    /* Product/Inventory */
+    .product-item {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr auto;
+      gap: 16px;
+      align-items: center;
+      padding: 16px;
+      background: #f8f9fa;
+      border-radius: 10px;
+      margin-bottom: 12px;
+    }
+    .product-item .name { font-weight: 600; }
+    .product-item .stock { color: #10b981; font-weight: 600; }
+    .product-item .stock.low { color: #ef4444; }
+    
+    /* Inventory Stock */
+    .inventory-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    .inventory-card {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e8ecf0 100%);
+      border-radius: 10px;
+      padding: 16px;
+      border-left: 4px solid #667eea;
+    }
+    .inventory-card .product-name {
+      font-weight: 700;
+      color: #1a1d29;
+      margin-bottom: 8px;
+    }
+    .inventory-card .stock-info {
+      font-size: 24px;
+      font-weight: 700;
+      color: #667eea;
+    }
+    .inventory-card .stock-label { font-size: 12px; color: #888; }
+    
+    /* Quick Replies */
+    .quick-reply {
+      display: inline-block;
+      padding: 8px 16px;
+      background: #667eea;
+      color: white;
+      border-radius: 20px;
+      font-size: 13px;
+      margin: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .quick-reply:hover { background: #764ba2; transform: scale(1.05); }
+    
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal {
+      background: white;
+      border-radius: 16px;
+      padding: 28px;
+      width: 90%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .modal h3 {
+      font-size: 18px;
+      margin-bottom: 20px;
+      color: #1a1d29;
+    }
+    .form-group { margin-bottom: 16px; }
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 6px;
+    }
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      margin-top: 24px;
+    }
+    .btn-cancel {
+      background: #e8ecf0;
+      color: #555;
+    }
+    
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #1a1d29;
+      color: white;
+      padding: 14px 28px;
+      border-radius: 10px;
+      font-size: 14px;
+      opacity: 0;
+      transition: all 0.3s;
+      z-index: 2000;
+    }
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+    
+    /* Section visibility */
+    .section { display: none; }
+    .section.active { display: block; }
+    
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: #999;
+    }
+    .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+    
+    /* Add form */
+    .add-form {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+    .add-form h4 {
+      font-size: 14px;
+      margin-bottom: 12px;
+      color: #555;
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    
+    /* Batch import */
+    .batch-area textarea {
+      min-height: 120px;
+      font-family: monospace;
+      font-size: 13px;
+    }
+    .batch-hint {
+      font-size: 12px;
+      color: #888;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <h1>🐟 闲鱼自动运营助手</h1>
+      <p>自动回复 · 自动发货 · 虚拟商品专版</p>
+    </div>
+    
+    <!-- Tabs -->
+    <div class="tabs">
+      <div class="tab active" data-tab="autoreply">📩 自动回复</div>
+      <div class="tab" data-tab="delivery">🚀 自动发货</div>
+      <div class="tab" data-tab="products">📦 商品管理</div>
+      <div class="tab" data-tab="inventory">📋 库存管理</div>
+    </div>
+    
+    <!-- Auto Reply Section -->
+    <div id="autoreply" class="section active">
+      <div class="card">
+        <div class="card-title">自动回复规则</div>
+        
+        <!-- Add Rule Form -->
+        <div class="add-form">
+          <h4>+ 添加新规则</h4>
+          <div class="form-row">
+            <div class="form-group">
+              <label>关键词</label>
+              <input type="text" id="newKeyword" placeholder="如：价格、怎么买">
+            </div>
+            <div class="form-group">
+              <label>回复内容</label>
+              <input type="text" id="newReply" placeholder="自动回复的内容">
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="addRule()">添加规则</button>
+        </div>
+        
+        <!-- Rules List -->
+        <div id="rulesList"></div>
+      </div>
+      
+      <div class="card">
+        <div class="card-title">快捷话术</div>
+        <div id="quickReplies">
+          <span class="quick-reply" onclick="useQuickReply(this)">亲，商品在售中哦～</span>
+          <span class="quick-reply" onclick="useQuickReply(this)">下单后自动发货，请稍等～</span>
+          <span class="quick-reply" onclick="useQuickReply(this)">有问题随时联系我～</span>
+          <span class="quick-reply" onclick="useQuickReply(this)">感谢购买，好评哦～</span>
+        </div>
+        <div style="margin-top: 16px;">
+          <input type="text" id="newQuickReply" placeholder="添加新的快捷话术...">
+          <button class="btn btn-primary btn-sm" style="margin-top: 8px;" onclick="addQuickReply()">添加</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Delivery Section -->
+    <div id="delivery" class="section">
+      <div class="card">
+        <div class="card-title">一键发货</div>
+        <p style="color: #666; margin-bottom: 16px;">选择订单类型并自动发货给买家</p>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label>买家留言/订单号</label>
+            <input type="text" id="orderInput" placeholder="输入买家留言或订单号">
+          </div>
+          <div class="form-group">
+            <label>关联商品</label>
+            <select id="productSelect"></select>
+          </div>
+        </div>
+        <button class="btn btn-success" onclick="doDelivery()">🚀 一键发货</button>
+        
+        <div id="deliveryLog" style="margin-top: 20px;"></div>
+      </div>
+      
+      <div class="card">
+        <div class="card-title">发货模板</div>
+        <div class="add-form">
+          <h4>+ 添加发货模板</h4>
+          <div class="form-row">
+            <div class="form-group">
+              <label>模板名称</label>
+              <input type="text" id="templateName" placeholder="如：卡密发货">
+            </div>
+            <div class="form-group">
+              <label>模板内容</label>
+              <input type="text" id="templateContent" placeholder="发货内容模板">
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="addTemplate()">添加模板</button>
+        </div>
+        <div id="templatesList"></div>
+      </div>
+    </div>
+    
+    <!-- Products Section -->
+    <div id="products" class="section">
+      <div class="card">
+        <div class="card-title">商品列表</div>
+        
+        <div class="add-form">
+          <h4>+ 添加商品</h4>
+          <div class="form-row">
+            <div class="form-group">
+              <label>商品名称</label>
+              <input type="text" id="productName" placeholder="商品名称">
+            </div>
+            <div class="form-group">
+              <label>价格 (元)</label>
+              <input type="number" id="productPrice" placeholder="0.00">
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="addProduct()">添加商品</button>
+        </div>
+        
+        <div id="productsList"></div>
+      </div>
+    </div>
+    
+    <!-- Inventory Section -->
+    <div id="inventory" class="section">
+      <div class="card">
+        <div class="card-title">库存总览</div>
+        <div id="inventoryOverview" class="inventory-grid"></div>
+      </div>
+      
+      <div class="card">
+        <div class="card-title">批量入库</div>
+        <div class="batch-area">
+          <div class="form-group">
+            <label>选择商品</label>
+            <select id="batchProduct"></select>
+          </div>
+          <div class="form-group">
+            <label>卡密/账号/链接（每行一条）</label>
+            <textarea id="batchItems" placeholder="一行一条，如：
+卡号-密码
+账号:密码
+https://..."></textarea>
+            <p class="batch-hint">支持卡密、账号、链接等多种虚拟商品格式</p>
+          </div>
+          <button class="btn btn-primary" onclick="batchImport()">批量入库</button>
+        </div>
+      </div>
+      
+      <div class="card">
+        <div class="card-title">库存明细</div>
+        <div id="inventoryList"></div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modal -->
+  <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <h3 id="modalTitle">编辑</h3>
+      <div id="modalContent"></div>
+      <div class="modal-actions">
+        <button class="btn btn-cancel" onclick="closeModal()">取消</button>
+        <button class="btn btn-primary" id="modalConfirm">确认</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+<script>
+// ==================== 数据存储 ====================
+const STORAGE_KEY = 'xianyu_v1_data';
+
+function getData() {
+  const d = localStorage.getItem(STORAGE_KEY);
+  return d ? JSON.parse(d) : {
+    rules: [],
+    quickReplies: [],
+    products: [],
+    inventory: {},
+    templates: [],
+    deliveryLog: []
+  };
+}
+
+function saveData(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+// ==================== 标签切换 ====================
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(tab.dataset.tab).classList.add('active');
+    renderCurrentTab();
+  });
+});
+
+// ==================== 自动回复 ====================
+function addRule() {
+  const keyword = document.getElementById('newKeyword').value.trim();
+  const reply = document.getElementById('newReply').value.trim();
+  if (!keyword || !reply) return toast('请填写完整');
+  
+  const data = getData();
+  data.rules.push({ keyword, reply });
+  saveData(data);
+  
+  document.getElementById('newKeyword').value = '';
+  document.getElementById('newReply').value = '';
+  renderRules();
+  toast('规则已添加');
+}
+
+function renderRules() {
+  const data = getData();
+  const container = document.getElementById('rulesList');
+  
+  if (data.rules.length === 0) {
+    container.innerHTML = '<div class="empty-state"><div class="icon">📝</div>暂无规则，点击上方添加</div>';
+    return;
+  }
+  
+  container.innerHTML = data.rules.map((r, i) => `
+    <div class="rule-item">
+      <span class="keyword">${r.keyword}</span>
+      <span class="reply">→ ${r.reply}</span>
+      <div class="actions">
+        <button class="btn btn-danger btn-sm" onclick="deleteRule(${i})">删除</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function deleteRule(index) {
+  const data = getData();
+  data.rules.splice(index, 1);
+  saveData(data);
+  renderRules();
+  toast('规则已删除');
+}
+
+// 快捷话术
+function addQuickReply() {
+  const text = document.getElementById('newQuickReply').value.trim();
+  if (!text) return;
+  
+  const data = getData();
+  data.quickReplies.push(text);
+  saveData(data);
+  
+  document.getElementById('newQuickReply').value = '';
+  renderQuickReplies();
+  toast('话术已添加');
+}
+
+function useQuickReply(el) {
+  navigator.clipboard.writeText(el.textContent).then(() => {
+    toast('已复制：' + el.textContent);
+  });
+}
+
+function renderQuickReplies() {
+  const data = getData();
+  const container = document.getElementById('quickReplies');
+  const defaultReplies = [
+    '亲，商品在售中哦～',
+    '下单后自动发货，请稍等～',
+    '有问题随时联系我～',
+    '感谢购买，好评哦～'
+  ];
+  const allReplies = [...defaultReplies, ...data.quickReplies];
+  container.innerHTML = allReplies.map(r => 
+    `<span class="quick-reply" onclick="useQuickReply(this)">${r}</span>`
+  ).join('');
+}
+
+// ==================== 商品管理 ====================
+function addProduct() {
+  const name = document.getElementById('productName').value.trim();
+  const price = parseFloat(document.getElementById('productPrice').value);
+  if (!name || isNaN(price)) return toast('请填写完整');
+  
+  const data = getData();
+  data.products.push({ id: Date.now(), name, price });
+  data.inventory[name] = [];
+  saveData(data);
+  
+  document.getElementById('productName').value = '';
+  document.getElementById('productPrice').value = '';
+  renderProducts();
+  updateProductSelects();
+  toast('商品已添加');
+}
+
+function renderProducts() {
+  const data = getData();
+  const container = document.getElementById('productsList');
+  
+  if (data.products.length === 0) {
+    container.innerHTML = '<div class="empty-state"><div class="icon">📦</div>暂无商品，点击上方添加</div>';
+    return;
+  }
+  
+  container.innerHTML = data.products.map(p => {
+    const stock = (data.inventory[p.name] || []).length;
+    return `
+      <div class="product-item">
+        <div class="name">${p.name}</div>
+        <div>¥${p.price.toFixed(2)}</div>
+        <div class="stock ${stock < 5 ? 'low' : ''}">库存: ${stock}</div>
+        <div>
+          <button class="btn btn-danger btn-sm" onclick="deleteProduct('${p.name}')">删除</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function deleteProduct(name) {
+  const data = getData();
+  data.products = data.products.filter(p => p.name !== name);
+  delete data.inventory[name];
+  saveData(data);
+  renderProducts();
+  updateProductSelects();
+  toast('商品已删除');
+}
+
+// ==================== 库存管理 ====================
+function renderInventory() {
+  const data = getData();
+  
+  // 总览
+  const overview = document.getElementById('inventoryOverview');
+  overview.innerHTML = data.products.map(p => {
+    const items = data.inventory[p.name] || [];
+    return `
+      <div class="inventory-card">
+        <div class="product-name">${p.name}</div>
+        <div class="stock-info">${items.length}</div>
+        <div class="stock-label">件库存</div>
+      </div>
+    `;
+  }).join('') || '<div class="empty-state">暂无商品</div>';
+  
+  // 明细
+  const list = document.getElementById('inventoryList');
+  let html = '';
+  data.products.forEach(p => {
+    const items = data.inventory[p.name] || [];
+    html += `<h4 style="margin: 16px 0 8px;">${p.name} (${items.length}件)</h4>`;
+    if (items.length === 0) {
+      html += '<p style="color:#999;">暂无库存</p>';
+    } else {
+      items.forEach((item, i) => {
+        html += `<div class="rule-item">
+          <span>${item}</span>
+          <button class="btn btn-danger btn-sm" onclick="deleteInventoryItem('${p.name}', ${i})">删除</button>
+        </div>`;
+      });
+    }
+  });
+  list.innerHTML = html || '<div class="empty-state">暂无库存</div>';
+}
+
+function deleteInventoryItem(productName, index) {
+  const data = getData();
+  data.inventory[productName].splice(index, 1);
+  saveData(data);
+  renderInventory();
+  renderProducts();
+  toast('已删除');
+}
+
+function batchImport() {
+  const productName = document.getElementById('batchProduct').value;
+  const items = document.getElementById('batchItems').value.trim().split('\n').filter(i => i.trim());
+  
+  if (!productName) return toast('请选择商品');
+  if (items.length === 0) return toast('请输入内容');
+  
+  const data = getData();
+  data.inventory[productName] = data.inventory[productName] || [];
+  data.inventory[productName].push(...items);
+  saveData(data);
+  
+  document.getElementById('batchItems').value = '';
+  renderInventory();
+  renderProducts();
+  updateProductSelects();
+  toast(`已入库 ${items.length} 条`);
+}
+
+// ==================== 发货 ====================
+function doDelivery() {
+  const order = document.getElementById('orderInput').value.trim();
+  const productName = document.getElementById('productSelect').value;
+  
+  if (!order) return toast('请输入订单信息');
+  if (!productName) return toast('请选择商品');
+  
+  const data = getData();
+  const inventory = data.inventory[productName] || [];
+  
+  if (inventory.length === 0) return toast('库存不足');
+  
+  // 自动扣减库存
+  const content = inventory.shift();
+  data.inventory[productName] = inventory;
+  
+  // 记录发货
+  data.deliveryLog.unshift({
+    time: new Date().toLocaleString(),
+    order,
+    product: productName,
+    content
+  });
+  saveData(data);
+  
+  document.getElementById('orderInput').value = '';
+  
+  // 显示发货内容（模拟自动回复）
+  const log = document.getElementById('deliveryLog');
+  log.innerHTML = `
+    <div class="rule-item" style="border-left-color: #10b981; background: #f0fdf4;">
+      <div>
+        <div style="color: #10b981; font-weight: 600;">✅ 发货成功</div>
+        <div style="margin-top: 8px;">订单: ${order}</div>
+        <div style="margin-top: 4px;">商品: ${productName}</div>
+        <div style="margin-top: 8px; padding: 10px; background: white; border-radius: 6px;">
+          <strong>发货内容：</strong><br>
+          <code style="word-break: break-all;">${content}</code>
+        </div>
+      </div>
+    </div>
+  ` + log.innerHTML;
+  
+  renderInventory();
+  renderProducts();
+  toast('发货成功');
+}
+
+function addTemplate() {
+  const name = document.getElementById('templateName').value.trim();
+  const content = document.getElementById('templateContent').value.trim();
+  if (!name || !content) return toast('请填写完整');
+  
+  const data = getData();
+  data.templates.push({ name, content });
+  saveData(data);
+  
+  document.getElementById('templateName').value = '';
+  document.getElementById('templateContent').value = '';
+  renderTemplates();
+  toast('模板已添加');
+}
+
+function renderTemplates() {
+  const data = getData();
+  const container = document.getElementById('templatesList');
+  
+  if (data.templates.length === 0) {
+    container.innerHTML = '<p style="color:#999;">暂无模板</p>';
+    return;
+  }
+  
+  container.innerHTML = data.templates.map((t, i) => `
+    <div class="rule-item">
+      <span class="keyword">${t.name}</span>
+      <span class="reply">${t.content}</span>
+      <button class="btn btn-danger btn-sm" onclick="deleteTemplate(${i})">删除</button>
+    </div>
+  `).join('');
+}
+
+function deleteTemplate(index) {
+  const data = getData();
+  data.templates.splice(index, 1);
+  saveData(data);
+  renderTemplates();
+  toast('模板已删除');
+}
+
+// ==================== 辅助 ====================
+function updateProductSelects() {
+  const data = getData();
+  const options = data.products.map(p => `<option value="${p.name}">${p.name}</option>`).join('');
+  document.getElementById('productSelect').innerHTML = '<option value="">选择商品...</option>' + options;
+  document.getElementById('batchProduct').innerHTML = '<option value="">选择商品...</option>' + options;
+}
+
+function renderCurrentTab() {
+  const activeTab = document.querySelector('.tab.active').dataset.tab;
+  switch(activeTab) {
+    case 'autoreply': renderRules(); break;
+    case 'delivery': renderTemplates(); break;
+    case 'products': renderProducts(); break;
+    case 'inventory': renderInventory(); break;
+  }
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// Modal
+function openModal(title, content, onConfirm) {
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalContent').innerHTML = content;
+  document.getElementById('modalConfirm').onclick = onConfirm;
+  document.getElementById('modalOverlay').classList.add('show');
+}
+
+function closeModal(e) {
+  if (e && e.target !== document.getElementById('modalOverlay')) return;
+  document.getElementById('modalOverlay').classList.remove('show');
+}
+
+// ==================== 初始化 ====================
+function init() {
+  // 确保默认数据存在
+  const data = getData();
+  if (!data.inventory) data.inventory = {};
+  saveData(data);
+  
+  renderRules();
+  renderQuickReplies();
+  renderProducts();
+  renderInventory();
+  renderTemplates();
+  updateProductSelects();
+}
+
+init();
+</script>
+</body>
+</html>

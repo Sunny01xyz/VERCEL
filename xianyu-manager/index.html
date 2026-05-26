@@ -1,0 +1,1874 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>闲鱼运营助手 v2.0</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: #f4f6fa;
+      color: #333;
+      height: 100vh;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* ===== Sidebar ===== */
+    .sidebar {
+      width: 210px;
+      background: #1a1d29;
+      color: #c8d0e0;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      user-select: none;
+    }
+    .sidebar-head {
+      padding: 18px 16px 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .sidebar-logo {
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .sidebar-logo .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #00d4ff;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+    .sidebar-ver {
+      font-size: 11px;
+      color: #4a5568;
+      margin-top: 3px;
+    }
+    .sidebar-accounts {
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .account-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 3px;
+    }
+    .account-pill:hover { background: rgba(255,255,255,0.05); }
+    .account-pill.active { background: rgba(0,212,255,0.15); color: #00d4ff; }
+    .account-pill .avatar {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      color: white;
+      font-weight: 700;
+    }
+    .account-pill .online-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #10b981;
+      margin-left: auto;
+    }
+    .sidebar-nav {
+      flex: 1;
+      padding: 8px 8px;
+      overflow-y: auto;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 13.5px;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 2px;
+      color: #8b95a8;
+      position: relative;
+    }
+    .nav-item:hover { background: rgba(255,255,255,0.05); color: #c8d0e0; }
+    .nav-item.active {
+      background: rgba(0,212,255,0.12);
+      color: #00d4ff;
+    }
+    .nav-item.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 3px;
+      height: 60%;
+      background: #00d4ff;
+      border-radius: 0 3px 3px 0;
+    }
+    .nav-item .icon { font-size: 16px; width: 22px; text-align: center; }
+    .nav-item .badge {
+      margin-left: auto;
+      background: #ef4444;
+      color: white;
+      font-size: 10px;
+      padding: 1px 6px;
+      border-radius: 10px;
+      font-weight: 700;
+    }
+    .sidebar-footer {
+      padding: 12px 16px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      font-size: 11px;
+      color: #3d4459;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* ===== Main ===== */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Topbar */
+    .topbar {
+      background: white;
+      padding: 0 24px;
+      height: 58px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      border-bottom: 1px solid #e8ecf0;
+      flex-shrink: 0;
+    }
+    .topbar-search {
+      flex: 1;
+      max-width: 400px;
+      position: relative;
+    }
+    .topbar-search input {
+      width: 100%;
+      padding: 8px 16px 8px 38px;
+      border-radius: 8px;
+      border: 1.5px solid #e2e8f0;
+      font-size: 13.5px;
+      outline: none;
+      transition: all 0.2s;
+      background: #f8fafc;
+    }
+    .topbar-search input:focus { border-color: #00d4ff; background: white; }
+    .topbar-search .icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #94a3b8;
+      font-size: 15px;
+    }
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-left: auto;
+    }
+    .topbar-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      border: 1.5px solid #e2e8f0;
+      background: white;
+      cursor: pointer;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      position: relative;
+      color: #64748b;
+    }
+    .topbar-btn:hover { background: #f1f5f9; border-color: #00d4ff; }
+    .topbar-btn .red-dot {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 8px;
+      height: 8px;
+      background: #ef4444;
+      border-radius: 50%;
+      border: 2px solid white;
+    }
+    .topbar-user {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      padding: 4px 10px;
+      border-radius: 8px;
+      transition: background 0.2s;
+    }
+    .topbar-user:hover { background: #f1f5f9; }
+    .topbar-user .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .topbar-user .name { font-size: 13.5px; font-weight: 600; color: #1e293b; }
+    .topbar-user .role { font-size: 11px; color: #94a3b8; }
+
+    /* Content */
+    .content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 24px;
+    }
+
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* Page header */
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .page-title { font-size: 18px; font-weight: 700; color: #1a1d29; }
+    .page-title span { color: #94a3b8; font-size: 14px; font-weight: 400; margin-left: 8px; }
+
+    /* Stats row */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .stat-card {
+      background: white;
+      border-radius: 14px;
+      padding: 18px 20px;
+      border: 1px solid #e8ecf0;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: all 0.2s;
+    }
+    .stat-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+    .stat-icon.blue { background: #dbeafe; }
+    .stat-icon.green { background: #d1fae5; }
+    .stat-icon.yellow { background: #fef3c7; }
+    .stat-icon.red { background: #fee2e2; }
+    .stat-info { flex: 1; min-width: 0; }
+    .stat-val { font-size: 22px; font-weight: 800; color: #1a1d29; line-height: 1; }
+    .stat-label { font-size: 12.5px; color: #94a3b8; margin-top: 4px; }
+    .stat-trend { font-size: 11px; margin-top: 4px; font-weight: 600; }
+    .stat-trend.up { color: #10b981; }
+    .stat-trend.down { color: #ef4444; }
+    .stat-ring {
+      width: 46px;
+      height: 46px;
+      flex-shrink: 0;
+      position: relative;
+    }
+    .stat-ring svg { transform: rotate(-90deg); }
+    .stat-ring text { font-size: 10px; font-weight: 700; fill: #1a1d29; }
+    .stat-ring .bg { stroke: #f1f5f9; }
+    .stat-ring .fg { stroke: #00d4ff; stroke-linecap: round; transition: stroke-dashoffset 1s; }
+
+    /* Section */
+    .section { margin-bottom: 20px; }
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .section-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #1a1d29;
+    }
+    .section-title::before {
+      content: '';
+      display: inline-block;
+      width: 3px;
+      height: 16px;
+      background: #00d4ff;
+      border-radius: 2px;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+
+    /* Cards */
+    .card {
+      background: white;
+      border-radius: 14px;
+      border: 1px solid #e8ecf0;
+      overflow: hidden;
+    }
+    .card-head {
+      padding: 14px 18px;
+      border-bottom: 1px solid #f1f5f9;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .card-title { font-size: 14px; font-weight: 700; color: #1a1d29; }
+    .card-body { padding: 14px 18px; }
+
+    /* Table */
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .table th {
+      background: #f8fafc;
+      padding: 10px 14px;
+      text-align: left;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #64748b;
+      border-bottom: 1px solid #e8ecf0;
+    }
+    .table td {
+      padding: 10px 14px;
+      font-size: 13.5px;
+      border-bottom: 1px solid #f1f5f9;
+      vertical-align: middle;
+    }
+    .table tr:last-child td { border-bottom: none; }
+    .table tbody tr:hover { background: #f8fafc; }
+
+    /* Buttons */
+    .btn {
+      padding: 6px 14px;
+      border-radius: 7px;
+      border: none;
+      font-size: 12.5px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+    .btn-primary { background: #00d4ff; color: #1a1d29; }
+    .btn-primary:hover { background: #00b8e0; }
+    .btn-success { background: #d1fae5; color: #065f46; }
+    .btn-success:hover { background: #a7f3d0; }
+    .btn-danger { background: #fee2e2; color: #991b1b; }
+    .btn-danger:hover { background: #fecaca; }
+    .btn-outline { background: white; border: 1.5px solid #e2e8f0; color: #475569; }
+    .btn-outline:hover { border-color: #00d4ff; color: #00d4ff; }
+    .btn-sm { padding: 4px 10px; font-size: 11.5px; }
+    .btn-lg { padding: 9px 20px; font-size: 14px; }
+    .btn-group { display: flex; gap: 6px; }
+
+    /* Tags */
+    .tag {
+      display: inline-block;
+      padding: 2px 9px;
+      border-radius: 10px;
+      font-size: 11.5px;
+      font-weight: 600;
+    }
+    .tag-blue { background: #dbeafe; color: #1d4ed8; }
+    .tag-green { background: #d1fae5; color: #065f46; }
+    .tag-yellow { background: #fef3c7; color: #92400e; }
+    .tag-red { background: #fee2e2; color: #991b1b; }
+    .tag-gray { background: #f1f5f9; color: #475569; }
+    .tag-orange { background: #fff7ed; color: #c2410c; }
+
+    /* Form */
+    .form-row { display: flex; gap: 12px; margin-bottom: 12px; }
+    .form-group { flex: 1; margin-bottom: 12px; }
+    .form-label { display: block; font-size: 12.5px; font-weight: 600; color: #374151; margin-bottom: 5px; }
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1.5px solid #e2e8f0;
+      font-size: 13.5px;
+      outline: none;
+      transition: border-color 0.2s;
+      font-family: inherit;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: #00d4ff; }
+    .form-textarea { resize: vertical; min-height: 80px; }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      display: none;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal {
+      background: white;
+      border-radius: 16px;
+      width: 580px;
+      max-height: 85vh;
+      overflow-y: auto;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.2);
+    }
+    .modal-head {
+      padding: 18px 22px;
+      border-bottom: 1px solid #e8ecf0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .modal-title { font-size: 16px; font-weight: 700; color: #1a1d29; }
+    .modal-close { width: 30px; height: 30px; border-radius: 8px; border: none; background: #f1f5f9; cursor: pointer; font-size: 16px; color: #64748b; display: flex; align-items: center; justify-content: center; }
+    .modal-close:hover { background: #fee2e2; color: #ef4444; }
+    .modal-body { padding: 18px 22px; }
+    .modal-foot { padding: 14px 22px; border-top: 1px solid #e8ecf0; display: flex; justify-content: flex-end; gap: 8px; }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #1a1d29;
+      color: white;
+      padding: 10px 22px;
+      border-radius: 30px;
+      font-size: 13.5px;
+      font-weight: 600;
+      z-index: 9999;
+      transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+    .toast.ok { background: #059669; }
+    .toast.err { background: #ef4444; }
+
+    /* Coupon card */
+    .coupon-card {
+      background: white;
+      border-radius: 12px;
+      border: 1px solid #e8ecf0;
+      padding: 14px 16px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.2s;
+    }
+    .coupon-card:hover { border-color: #00d4ff; box-shadow: 0 2px 12px rgba(0,212,255,0.1); }
+    .coupon-icon { font-size: 28px; }
+    .coupon-info { flex: 1; }
+    .coupon-name { font-size: 14px; font-weight: 700; color: #1a1d29; }
+    .coupon-meta { font-size: 12px; color: #94a3b8; margin-top: 2px; }
+    .coupon-stock { font-size: 18px; font-weight: 800; color: #1a1d29; }
+
+    /* Reply rules */
+    .rule-card {
+      background: white;
+      border-radius: 12px;
+      border: 1px solid #e8ecf0;
+      padding: 14px 16px;
+      margin-bottom: 10px;
+    }
+    .rule-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .rule-keywords { display: flex; gap: 6px; flex-wrap: wrap; }
+    .rule-keyword {
+      padding: 3px 10px;
+      background: #dbeafe;
+      color: #1d4ed8;
+      border-radius: 6px;
+      font-size: 12.5px;
+      font-weight: 600;
+    }
+    .rule-product {
+      padding: 3px 10px;
+      background: #f3e8ff;
+      color: #7c3aed;
+      border-radius: 6px;
+      font-size: 12.5px;
+      font-weight: 600;
+    }
+    .rule-reply {
+      background: #f8fafc;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 13px;
+      color: #475569;
+      line-height: 1.6;
+      margin-bottom: 8px;
+    }
+    .rule-toggle { position: relative; width: 38px; height: 22px; }
+    .rule-toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute;
+      inset: 0;
+      background: #e2e8f0;
+      border-radius: 11px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .toggle-slider::before {
+      content: '';
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      left: 3px;
+      top: 3px;
+      background: white;
+      border-radius: 50%;
+      transition: 0.3s;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    input:checked + .toggle-slider { background: #00d4ff; }
+    input:checked + .toggle-slider::before { transform: translateX(16px); }
+
+    /* Notice bar */
+    .notice-bar {
+      background: linear-gradient(90deg, #1a1d29, #2d3561);
+      color: #c8d0e0;
+      padding: 10px 20px;
+      font-size: 12.5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-radius: 10px;
+      margin-bottom: 16px;
+    }
+    .notice-bar .icon { font-size: 16px; }
+    .notice-bar .text { flex: 1; }
+    .notice-bar .time { color: #64748b; font-size: 11px; }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 2px solid #f1f5f9;
+      margin-bottom: 16px;
+    }
+    .tab {
+      padding: 8px 18px;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #94a3b8;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      transition: all 0.2s;
+    }
+    .tab:hover { color: #475569; }
+    .tab.active { color: #00d4ff; border-bottom-color: #00d4ff; }
+
+    /* Chart placeholder */
+    .chart-area {
+      background: white;
+      border-radius: 14px;
+      border: 1px solid #e8ecf0;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .chart-title { font-size: 14px; font-weight: 700; color: #1a1d29; margin-bottom: 16px; }
+
+    /* Grid layouts */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+    .grid-mix { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .grid-2, .grid-3, .grid-mix { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 600px) {
+      .sidebar { display: none; }
+      .stats-row { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar">
+  <div class="sidebar-head">
+    <div class="sidebar-logo">
+      <div class="dot"></div>
+      闲鱼运营助手
+    </div>
+    <div class="sidebar-ver">v2.0 · 专业版</div>
+  </div>
+
+  <!-- Account pills -->
+  <div class="sidebar-accounts" id="accountList"></div>
+
+  <!-- Navigation -->
+  <div class="sidebar-nav">
+    <div class="nav-item active" data-page="dashboard" onclick="showPage('dashboard')">
+      <span class="icon">📊</span> 首页
+    </div>
+    <div class="nav-item" data-page="autoreply" onclick="showPage('autoreply')">
+      <span class="icon">💬</span> 自动回复
+    </div>
+    <div class="nav-item" data-page="delivery" onclick="showPage('delivery')">
+      <span class="icon">🚀</span> 自动发货
+    </div>
+    <div class="nav-item" data-page="products" onclick="showPage('products')">
+      <span class="icon">📦</span> 商品管理
+    </div>
+    <div class="nav-item" data-page="coupons" onclick="showPage('coupons')">
+      <span class="icon">🎫</span> 卡券管理
+      <span class="badge" id="couponBadge">0</span>
+    </div>
+    <div class="nav-item" data-page="orders" onclick="showPage('orders')">
+      <span class="icon">🧾</span> 订单管理
+    </div>
+    <div class="nav-item" data-page="customerservice" onclick="showPage('customerservice')">
+      <span class="icon">🎧</span> 客服管理
+    </div>
+    <div class="nav-item" data-page="accounts" onclick="showPage('accounts')">
+      <span class="icon">👤</span> 账号管理
+    </div>
+    <div class="nav-item" data-page="notification" onclick="showPage('notification')">
+      <span class="icon">🔔</span> 通知设置
+    </div>
+    <div class="nav-item" data-page="settings" onclick="showPage('settings')">
+      <span class="icon">⚙️</span> 系统设置
+    </div>
+  </div>
+
+  <div class="sidebar-footer">
+    <span>本地存储</span>
+    <span id="dataSize">0 KB</span>
+  </div>
+</div>
+
+<!-- Main -->
+<div class="main">
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="topbar-search">
+      <span class="icon">🔍</span>
+      <input type="text" placeholder="搜索订单、商品、卡密..." id="globalSearch" oninput="globalSearch()">
+    </div>
+    <div class="topbar-right">
+      <button class="topbar-btn" title="消息通知">
+        🔔<span class="red-dot"></span>
+      </button>
+      <button class="topbar-btn" title="刷新数据" onclick="location.reload()">🔄</button>
+      <div class="topbar-user">
+        <div class="avatar">🐟</div>
+        <div>
+          <div class="name" id="currentAccountName">未登录</div>
+          <div class="role">闲鱼运营</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+
+    <!-- ===== 首页 ===== -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-header">
+        <div class="page-title">数据看板<span id="todayDate"></span></div>
+        <div class="btn-group">
+          <button class="btn btn-outline btn-sm" onclick="exportData()">📤 导出</button>
+          <button class="btn btn-primary btn-sm" onclick="showPage('autoreply')">💬 自动回复</button>
+        </div>
+      </div>
+
+      <!-- Notice bar -->
+      <div class="notice-bar">
+        <span class="icon">📢</span>
+        <span class="text">系统运行正常 · 自动回复已启用 · 共 <strong id="noticeOrderCount">0</strong> 条待处理订单</span>
+        <span class="time" id="noticeTime"></span>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-icon blue">📦</div>
+          <div class="stat-info">
+            <div class="stat-val" id="dash-orders">0</div>
+            <div class="stat-label">总订单数</div>
+            <div class="stat-trend up" id="dash-orders-trend">本月 +0</div>
+          </div>
+          <div class="stat-ring">
+            <svg width="46" height="46" viewBox="0 0 46 46">
+              <circle class="bg" cx="23" cy="23" r="18" fill="none" stroke-width="4"/>
+              <circle class="fg" cx="23" cy="23" r="18" fill="none" stroke-width="4"
+                stroke-dasharray="113.1" stroke-dashoffset="79.2"/>
+            </svg>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green">💰</div>
+          <div class="stat-info">
+            <div class="stat-val" id="dash-revenue">¥0</div>
+            <div class="stat-label">总收入</div>
+            <div class="stat-trend up" id="dash-revenue-trend">本月 +¥0</div>
+          </div>
+          <div class="stat-ring">
+            <svg width="46" height="46" viewBox="0 0 46 46">
+              <circle class="bg" cx="23" cy="23" r="18" fill="none" stroke-width="4"/>
+              <circle class="fg" cx="23" cy="23" r="18" fill="none" stroke-width="4"
+                stroke-dasharray="113.1" stroke-dashoffset="45.2"/>
+            </svg>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon yellow">🎫</div>
+          <div class="stat-info">
+            <div class="stat-val" id="dash-stock">0</div>
+            <div class="stat-label">卡券库存</div>
+            <div class="stat-trend down" id="dash-stock-trend">低库存预警</div>
+          </div>
+          <div class="stat-ring">
+            <svg width="46" height="46" viewBox="0 0 46 46">
+              <circle class="bg" cx="23" cy="23" r="18" fill="none" stroke-width="4"/>
+              <circle class="fg" cx="23" cy="23" r="18" fill="none" stroke-width="4"
+                stroke-dasharray="113.1" stroke-dashoffset="90.5"/>
+            </svg>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon red">💬</div>
+          <div class="stat-info">
+            <div class="stat-val" id="dash-replies">0</div>
+            <div class="stat-label">自动回复</div>
+            <div class="stat-trend up" id="dash-replies-trend">命中率 0%</div>
+          </div>
+          <div class="stat-ring">
+            <svg width="46" height="46" viewBox="0 0 46 46">
+              <circle class="bg" cx="23" cy="23" r="18" fill="none" stroke-width="4"/>
+              <circle class="fg" cx="23" cy="23" r="18" fill="none" stroke-width="4"
+                stroke-dasharray="113.1" stroke-dashoffset="67.9"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-mix">
+        <div>
+          <div class="chart-area">
+            <div class="chart-title">📈 订单趋势（近7天）</div>
+            <div id="miniChart" style="display:flex;align-items:flex-end;gap:8px;height:120px;padding:0 4px;"></div>
+          </div>
+          <div class="card">
+            <div class="card-head">
+              <span class="card-title">最近订单</span>
+              <button class="btn btn-outline btn-sm" onclick="showPage('orders')">查看全部</button>
+            </div>
+            <table class="table">
+              <thead><tr><th>订单号</th><th>商品</th><th>金额</th><th>状态</th></tr></thead>
+              <tbody id="dash-recent-orders"></tbody>
+            </table>
+          </div>
+        </div>
+        <div>
+          <div class="card">
+            <div class="card-head">
+              <span class="card-title">快捷操作</span>
+            </div>
+            <div class="card-body">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                <button class="btn btn-outline" onclick="showPage('autoreply')">💬 自动回复</button>
+                <button class="btn btn-outline" onclick="showPage('delivery')">🚀 自动发货</button>
+                <button class="btn btn-outline" onclick="showPage('coupons')">🎫 卡券入库</button>
+                <button class="btn btn-outline" onclick="showPage('orders')">🧾 订单管理</button>
+              </div>
+            </div>
+          </div>
+          <div class="card" style="margin-top:16px;">
+            <div class="card-head">
+              <span class="card-title">低库存预警</span>
+            </div>
+            <div class="card-body" id="lowStockList"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 自动回复 ===== -->
+    <div class="page" id="page-autoreply">
+      <div class="page-header">
+        <div class="page-title">自动回复</div>
+        <button class="btn btn-primary btn-lg" onclick="openModal('addRule')">+ 添加规则</button>
+      </div>
+
+      <div class="grid-mix" style="margin-bottom:20px;">
+        <div>
+          <div class="card">
+            <div class="card-head">
+              <span class="card-title">💬 消息匹配</span>
+            </div>
+            <div class="card-body">
+              <textarea class="form-textarea" id="buyerMsg" placeholder="粘贴买家发送的消息，系统自动匹配回复规则..." style="min-height:100px;"></textarea>
+              <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+                <button class="btn btn-primary" onclick="matchReply()">🔍 匹配回复</button>
+                <button class="btn btn-outline btn-sm" onclick="quickFill('发货')">发货</button>
+                <button class="btn btn-outline btn-sm" onclick="quickFill('价格')">价格</button>
+                <button class="btn btn-outline btn-sm" onclick="quickFill('退款')">退款</button>
+                <button class="btn btn-outline btn-sm" onclick="quickFill('激活')">激活</button>
+                <button class="btn btn-outline btn-sm" onclick="quickFill('有货吗')">有货吗</button>
+              </div>
+              <div id="matchResult" style="margin-top:12px;"></div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="card">
+            <div class="card-head">
+              <span class="card-title">⚡ 快捷话术</span>
+              <button class="btn btn-outline btn-sm" onclick="openModal('addQuickReply')">+ 添加</button>
+            </div>
+            <div id="quickReplies" style="padding:12px 16px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">📋 回复规则列表</span>
+        </div>
+        <div id="rulesList" style="padding:12px 16px;"></div>
+      </div>
+    </div>
+
+    <!-- ===== 自动发货 ===== -->
+    <div class="page" id="page-delivery">
+      <div class="page-header">
+        <div class="page-title">自动发货</div>
+      </div>
+      <div class="stats-row" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px;">
+        <div class="stat-card">
+          <div class="stat-icon blue">📦</div>
+          <div class="stat-info">
+            <div class="stat-val" id="del-total">0</div>
+            <div class="stat-label">总订单</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green">✅</div>
+          <div class="stat-info">
+            <div class="stat-val" id="del-sent">0</div>
+            <div class="stat-label">已发货</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon yellow">⏳</div>
+          <div class="stat-info">
+            <div class="stat-val" id="del-pending">0</div>
+            <div class="stat-label">待发货</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">🚀 一键发货</span>
+        </div>
+        <div class="card-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">选择商品</label>
+              <select class="form-select" id="del-product" onchange="loadDeliveryContent()">
+                <option value="">-- 选择商品 --</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">买家留言/备注</label>
+              <input type="text" class="form-input" id="del-buyer-note" placeholder="复制买家留言...">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">发货内容（自动从库存扣减）</label>
+            <textarea class="form-textarea" id="del-content" placeholder="选择商品后自动填充..." style="background:#f0fdf4;font-family:monospace;" readonly></textarea>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-success btn-lg" onclick="autoDelivery()">🚀 自动发货</button>
+            <button class="btn btn-primary btn-lg" onclick="copyDeliveryContent()">📋 复制发货内容</button>
+            <button class="btn btn-outline" onclick="clearDelivery()">清空</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:16px;">
+        <div class="card-head">
+          <span class="card-title">📝 发货模板管理</span>
+          <button class="btn btn-outline btn-sm" onclick="openModal('addTemplate')">+ 添加模板</button>
+        </div>
+        <div id="templateList" style="padding:12px 16px;"></div>
+      </div>
+    </div>
+
+    <!-- ===== 商品管理 ===== -->
+    <div class="page" id="page-products">
+      <div class="page-header">
+        <div class="page-title">商品管理</div>
+        <button class="btn btn-primary" onclick="openModal('addProduct')">+ 添加商品</button>
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">商品列表</span>
+        </div>
+        <table class="table">
+          <thead><tr><th>商品名称</th><th>分类</th><th>价格</th><th>库存</th><th>状态</th><th>操作</th></tr></thead>
+          <tbody id="productsTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ===== 卡券管理 ===== -->
+    <div class="page" id="page-coupons">
+      <div class="page-header">
+        <div class="page-title">卡券管理</div>
+        <div class="btn-group">
+          <button class="btn btn-outline" onclick="openModal('addCoupon')">+ 添加卡券</button>
+          <button class="btn btn-primary" onclick="openModal('batchImport')">📥 批量入库</button>
+        </div>
+      </div>
+      <div id="couponList"></div>
+    </div>
+
+    <!-- ===== 订单管理 ===== -->
+    <div class="page" id="page-orders">
+      <div class="page-header">
+        <div class="page-title">订单管理</div>
+        <button class="btn btn-outline" onclick="openModal('addOrder')">+ 手动录单</button>
+      </div>
+      <div class="tabs" id="orderTabs">
+        <div class="tab active" data-status="all" onclick="setOrderTab('all')">全部</div>
+        <div class="tab" data-status="待发货" onclick="setOrderTab('待发货')">待发货</div>
+        <div class="tab" data-status="已发货" onclick="setOrderTab('已发货')">已发货</div>
+        <div class="tab" data-status="已完成" onclick="setOrderTab('已完成')">已完成</div>
+      </div>
+      <div class="card">
+        <table class="table">
+          <thead><tr><th>订单号</th><th>买家</th><th>商品</th><th>卡密</th><th>金额</th><th>状态</th><th>时间</th><th>操作</th></tr></thead>
+          <tbody id="ordersTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ===== 客服管理 ===== -->
+    <div class="page" id="page-customerservice">
+      <div class="page-header">
+        <div class="page-title">客服管理</div>
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">💬 常用回复模板</span>
+          <button class="btn btn-outline btn-sm" onclick="openModal('addQuickReply')">+ 添加模板</button>
+        </div>
+        <div id="csReplies" style="padding:12px 16px;"></div>
+      </div>
+      <div class="card" style="margin-top:16px;">
+        <div class="card-head">
+          <span class="card-title">📊 客服统计</span>
+        </div>
+        <div class="card-body" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
+          <div style="text-align:center;">
+            <div style="font-size:32px;font-weight:800;color:#1a1d29;" id="cs-total">0</div>
+            <div style="font-size:12px;color:#94a3b8;">总消息数</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:32px;font-weight:800;color:#059669;" id="cs-auto">0</div>
+            <div style="font-size:12px;color:#94a3b8;">自动回复数</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:32px;font-weight:800;color:#d97706;" id="cs-manual">0</div>
+            <div style="font-size:12px;color:#94a3b8;">手动回复数</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 账号管理 ===== -->
+    <div class="page" id="page-accounts">
+      <div class="page-header">
+        <div class="page-title">账号管理</div>
+        <button class="btn btn-primary" onclick="openModal('addAccount')">+ 添加账号</button>
+      </div>
+      <div id="accountsList"></div>
+    </div>
+
+    <!-- ===== 通知设置 ===== -->
+    <div class="page" id="page-notification">
+      <div class="page-header">
+        <div class="page-title">通知设置</div>
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">🔔 通知渠道</span>
+        </div>
+        <div class="card-body">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+            <div style="background:#f8fafc;border-radius:10px;padding:16px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <span style="font-size:24px;">📮</span>
+                  <div>
+                    <div style="font-weight:700;font-size:14px;">邮件通知</div>
+                    <div style="font-size:11.5px;color:#94a3b8;">neworder@email.com</div>
+                  </div>
+                </div>
+                <label class="rule-toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+              </div>
+              <div style="font-size:12px;color:#64748b;">订单提醒 · 发货通知 · 库存预警</div>
+            </div>
+            <div style="background:#f8fafc;border-radius:10px;padding:16px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <span style="font-size:24px;">🔔</span>
+                  <div>
+                    <div style="font-weight:700;font-size:14px;">系统通知</div>
+                    <div style="font-size:11.5px;color:#94a3b8;">浏览器本地推送</div>
+                  </div>
+                </div>
+                <label class="rule-toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+              </div>
+              <div style="font-size:12px;color:#64748b;">实时消息 · 低库存提醒</div>
+            </div>
+            <div style="background:#f8fafc;border-radius:10px;padding:16px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <span style="font-size:24px;">💬</span>
+                  <div>
+                    <div style="font-weight:700;font-size:14px;">微信通知</div>
+                    <div style="font-size:11.5px;color:#94a3b8;">接入微信服务号</div>
+                  </div>
+                </div>
+                <label class="rule-toggle"><input type="checkbox"><span class="toggle-slider"></span></label>
+              </div>
+              <div style="font-size:12px;color:#64748b;">订单变更 · 收入通知</div>
+            </div>
+            <div style="background:#f8fafc;border-radius:10px;padding:16px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <span style="font-size:24px;">🔴</span>
+                  <div>
+                    <div style="font-weight:700;font-size:14px;">钉钉通知</div>
+                    <div style="font-size:11.5px;color:#94a3b8;">WebHook 地址未配置</div>
+                  </div>
+                </div>
+                <label class="rule-toggle"><input type="checkbox"><span class="toggle-slider"></span></label>
+              </div>
+              <div style="font-size:12px;color:#64748b;">接入钉钉群机器人</div>
+            </div>
+          </div>
+          <div style="margin-top:20px;padding:16px;background:#fffbeb;border:1px solid #fde68a;border-radius:10px;">
+            <div style="font-weight:700;font-size:13.5px;color:#92400e;margin-bottom:8px;">💡 通知规则</div>
+            <div style="font-size:12.5px;color:#78350f;line-height:2;">
+              · 收到新订单后 <input type="number" value="5" style="width:50px;padding:2px 6px;border-radius:4px;border:1px solid #fde68a;text-align:center;font-size:12.5px;"> 秒内通知<br>
+              · 卡券库存低于 <input type="number" value="5" style="width:50px;padding:2px 6px;border-radius:4px;border:1px solid #fde68a;text-align:center;font-size:12.5px;"> 张时触发低库存预警<br>
+              · 自动回复未命中时发送提醒
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 系统设置 ===== -->
+    <div class="page" id="page-settings">
+      <div class="page-header">
+        <div class="page-title">系统设置</div>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-head"><span class="card-title">基础设置</span></div>
+          <div class="card-body">
+            <div class="form-group">
+              <label class="form-label">当前账号名称</label>
+              <input type="text" class="form-input" id="cfg-account" placeholder="显示名称">
+            </div>
+            <div class="form-group">
+              <label class="form-label">发货备注模板</label>
+              <textarea class="form-textarea" id="cfg-delivery-note" placeholder="发货备注...">您好！您的商品已发货，请查收！
+【商品内容】
+{content}
+
+如有疑问欢迎私信~</textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">低库存预警阈值</label>
+              <input type="number" class="form-input" id="cfg-lowstock" value="5" style="max-width:160px;">
+            </div>
+            <button class="btn btn-primary" onclick="saveConfig()">💾 保存设置</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><span class="card-title">📦 数据管理</span></div>
+          <div class="card-body">
+            <div style="font-size:13px;color:#64748b;margin-bottom:14px;line-height:1.8;">
+              · 所有数据存储在浏览器本地<br>
+              · 不会上传至任何服务器<br>
+              · 建议定期导出备份
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
+              <button class="btn btn-primary" onclick="exportData()">📤 导出数据</button>
+              <button class="btn btn-outline" onclick="document.getElementById('importFile').click()">📥 导入数据</button>
+              <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+            </div>
+            <button class="btn btn-danger btn-sm" onclick="confirm('确定清空所有数据？') && clearAll()">🗑️ 清空所有数据</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-title" id="modalTitle">添加</span>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-foot" id="modalFoot"></div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== 数据存储 =====
+const KEY = 'xianyu_v2_data';
+function loadData() {
+  const raw = localStorage.getItem(KEY);
+  if (raw) return JSON.parse(raw);
+  return {
+    accounts: [],
+    currentAccount: null,
+    products: [],
+    coupons: [],
+    orders: [],
+    rules: [],
+    quickReplies: [],
+    templates: [
+      {id:1, name:'卡密发货', content:'【卡密】{card}\n【说明】激活码请在平台激活，售出概不退换'},
+      {id:2, name:'账号发货', content:'【账号】{account}\n【密码】{password}\n请及时修改密码！'},
+    ],
+    csStats: {total:0, auto:0, manual:0},
+    config: {account:'', deliveryNote:'', lowStock:5},
+    stats: {totalReplies:0}
+  };
+}
+function saveData(d) {
+  localStorage.setItem(KEY, JSON.stringify(d));
+  updateDataSize();
+}
+let D = loadData();
+
+// ===== 页面切换 =====
+const pageTitles = {dashboard:'数据看板',autoreply:'自动回复',delivery:'自动发货',products:'商品管理',coupons:'卡券管理',orders:'订单管理',customerservice:'客服管理',accounts:'账号管理',notification:'通知设置',settings:'系统设置'};
+let currentOrderTab = 'all';
+
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelector(`[data-page="${name}"]`)?.classList.add('active');
+  renderAll();
+}
+
+function renderAll() {
+  renderDashboard();
+  renderAccounts();
+  renderRules();
+  renderQuickReplies();
+  renderProducts();
+  renderCoupons();
+  renderOrders();
+  renderDelivery();
+  renderCSReplies();
+  renderAccountsPage();
+  renderConfig();
+  updateDataSize();
+  const totalCoupon = D.coupons.reduce((s,c) => s + (c.items?.length||0), 0);
+  document.getElementById('couponBadge').textContent = totalCoupon;
+}
+
+// ===== 首页 =====
+function renderDashboard() {
+  const orders = D.orders;
+  const revenue = orders.reduce((s,o) => s + (parseFloat(o.amount)||0), 0);
+  const stock = D.coupons.reduce((s,c) => s + (c.items?.length||0), 0);
+  const low = D.coupons.filter(c => (c.items?.length||0) <= D.config.lowStock);
+
+  document.getElementById('dash-orders').textContent = orders.length;
+  document.getElementById('dash-revenue').textContent = '¥' + revenue.toFixed(2);
+  document.getElementById('dash-stock').textContent = stock;
+  document.getElementById('dash-replies').textContent = D.stats.totalReplies;
+  const hitRate = orders.length > 0 ? Math.round(D.stats.totalReplies/orders.length*100) : 0;
+  document.getElementById('dash-replies-trend').textContent = '命中率 ' + hitRate + '%';
+  document.getElementById('dash-stock-trend').textContent = low.length > 0 ? `⚠ ${low.length} 个低库存` : '库存充足';
+  document.getElementById('noticeOrderCount').textContent = orders.filter(o=>o.status==='待发货').length;
+
+  // Recent orders
+  const recent = orders.slice(-6).reverse();
+  document.getElementById('dash-recent-orders').innerHTML = recent.length ? recent.map(o => `
+    <tr>
+      <td><span style="font-family:monospace;font-size:12px;color:#64748b;">${o.id}</span></td>
+      <td>${o.product||'-'}</td>
+      <td>¥${o.amount||'0'}</td>
+      <td><span class="tag ${getStatusTag(o.status)}">${o.status||'未知'}</span></td>
+    </tr>
+  `).join('') : '<tr><td colspan="4" style="text-align:center;color:#94a3b8;padding:20px;">暂无订单数据</td></tr>';
+
+  // Mini chart (last 7 days)
+  const days = 7;
+  const now = new Date();
+  const dayData = [];
+  for (let i = days-1; i >= 0; i--) {
+    const d = new Date(now); d.setDate(d.getDate()-i);
+    const dateStr = `${d.getMonth()+1}/${d.getDate()}`;
+    const count = orders.filter(o => {
+      const od = new Date(o.time);
+      return od.toDateString() === d.toDateString();
+    }).length;
+    dayData.push({label: dateStr, count});
+  }
+  const maxCount = Math.max(...dayData.map(d=>d.count), 1);
+  document.getElementById('miniChart').innerHTML = dayData.map(d => `
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;">
+      <div style="flex:1;width:100%;display:flex;align-items:flex-end;background:#f1f5f9;border-radius:4px;min-height:4px;">
+        <div style="width:100%;background:linear-gradient(180deg,#00d4ff,#0099cc);border-radius:4px;height:${(d.count/maxCount*100)||5}%;"></div>
+      </div>
+      <div style="font-size:10px;color:#94a3b8;text-align:center;">${d.label}</div>
+      <div style="font-size:10px;color:#00d4ff;font-weight:700;">${d.count}</div>
+    </div>
+  `).join('');
+
+  // Low stock
+  document.getElementById('lowStockList').innerHTML = low.length ? low.map(c => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f1f5f9;">
+      <span style="font-size:13px;color:#475569;">${c.name}</span>
+      <span class="tag tag-red">仅 ${c.items?.length||0} 张</span>
+    </div>
+  `).join('') : '<div style="font-size:13px;color:#94a3b8;text-align:center;padding:16px;">暂无低库存预警</div>';
+
+  // Date
+  document.getElementById('todayDate').textContent = new Date().toLocaleDateString('zh-CN', {year:'numeric',month:'long',day:'numeric'});
+  document.getElementById('noticeTime').textContent = new Date().toLocaleTimeString('zh-CN');
+}
+
+// ===== 自动回复 =====
+function renderRules() {
+  const list = document.getElementById('rulesList');
+  if (!D.rules.length) {
+    list.innerHTML = '<div style="text-align:center;color:#94a3b8;padding:24px;font-size:13.5px;">暂无规则，点击右上角添加</div>';
+    return;
+  }
+  list.innerHTML = D.rules.map(r => `
+    <div class="rule-card">
+      <div class="rule-head">
+        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+          ${(r.keywords||[r.keyword]).map(k => `<span class="rule-keyword">${k}</span>`).join('')}
+          ${r.product ? `<span class="rule-product">📦 ${r.product}</span>` : '<span class="tag tag-gray">全局</span>'}
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <label class="rule-toggle"><input type="checkbox" ${r.enabled?'checked':''} onchange="toggleRule(${r.id})"><span class="toggle-slider"></span></label>
+          <button class="btn btn-danger btn-sm" onclick="deleteRule(${r.id})">删除</button>
+        </div>
+      </div>
+      <div class="rule-reply">${r.reply}</div>
+    </div>
+  `).join('');
+}
+
+function matchReply() {
+  const msg = document.getElementById('buyerMsg').value.trim();
+  if (!msg) { toast('请输入买家消息','err'); return; }
+  D.stats.totalReplies++;
+  D.csStats.total++;
+  D.csStats.auto++;
+  saveData(D);
+
+  let matched = null, matchedRule = null;
+  for (const r of D.rules) {
+    if (!r.enabled) continue;
+    for (const kw of (r.keywords||[r.keyword])) {
+      if (r.matchMode==='exact' ? msg===kw : msg.includes(kw)) {
+        matched = r.reply; matchedRule = kw; break;
+      }
+    }
+    if (matched) break;
+  }
+  const result = document.getElementById('matchResult');
+  if (matched) {
+    result.innerHTML = `
+      <div style="background:#d1fae5;border:1px solid #a7f3d0;border-radius:10px;padding:12px;">
+        <div style="font-size:11.5px;color:#065f46;font-weight:600;margin-bottom:4px;">✅ 匹配「${matchedRule}」</div>
+        <div style="font-size:13.5px;color:#065f46;font-weight:600;line-height:1.6;">${matched}</div>
+        <button class="btn btn-primary btn-sm" style="margin-top:10px;" onclick="copyText('${matched.replace(/'/g,"\\'")}')">📋 复制</button>
+      </div>`;
+    toast('匹配成功！','ok');
+  } else {
+    result.innerHTML = `<div style="background:#fee2e2;border:1px solid #fecaca;border-radius:10px;padding:12px;color:#991b1b;font-size:13.5px;">❌ 未匹配到规则，请手动回复</div>`;
+    toast('未匹配','err');
+  }
+  renderDashboard();
+}
+
+function quickFill(text) { document.getElementById('buyerMsg').value = text; }
+
+function renderQuickReplies() {
+  const el = document.getElementById('quickReplies');
+  if (!D.quickReplies.length) {
+    el.innerHTML = '<div style="text-align:center;color:#94a3b8;padding:16px;font-size:13px;">暂无话术</div>';
+    return;
+  }
+  el.innerHTML = D.quickReplies.map(q => `
+    <div style="background:#f8fafc;border-radius:8px;padding:10px;margin-bottom:8px;cursor:pointer;" onclick="copyText('${q.reply.replace(/'/g,"\\'")}')" title="点击复制">
+      <div style="font-size:12px;font-weight:600;color:#475569;margin-bottom:3px;">${q.label||q.keyword}</div>
+      <div style="font-size:12px;color:#94a3b8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${q.reply}</div>
+    </div>
+  `).join('');
+}
+
+function renderCSReplies() {
+  const el = document.getElementById('csReplies');
+  if (!D.quickReplies.length) {
+    el.innerHTML = '<div style="text-align:center;color:#94a3b8;padding:16px;">暂无模板</div>';
+    return;
+  }
+  el.innerHTML = D.quickReplies.map(q => `
+    <div style="background:#f8fafc;border-radius:8px;padding:10px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div style="font-size:12.5px;font-weight:700;color:#1a1d29;">${q.label||q.keyword}</div>
+        <div style="font-size:12px;color:#64748b;margin-top:2px;">${q.reply}</div>
+      </div>
+      <div style="display:flex;gap:6px;">
+        <button class="btn btn-outline btn-sm" onclick="copyText('${q.reply.replace(/'/g,"\\'")}')">复制</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteQuickReply(${q.id})">删除</button>
+      </div>
+    </div>
+  `).join('');
+  document.getElementById('cs-total').textContent = D.csStats.total;
+  document.getElementById('cs-auto').textContent = D.csStats.auto;
+  document.getElementById('cs-manual').textContent = D.csStats.manual;
+}
+
+// ===== 商品管理 =====
+function renderProducts() {
+  const tbody = document.getElementById('productsTable');
+  if (!D.products.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#94a3b8;padding:30px;">暂无商品</td></tr>';
+    return;
+  }
+  tbody.innerHTML = D.products.map(p => `
+    <tr>
+      <td style="font-weight:700;">${p.name}</td>
+      <td><span class="tag tag-gray">${p.category||'默认分类'}</span></td>
+      <td>¥${p.price||'0.00'}</td>
+      <td>${p.stock||0}</td>
+      <td><span class="tag ${p.enabled?'tag-green':'tag-gray'}">${p.enabled?'在售':'下架'}</span></td>
+      <td>
+        <div class="btn-group">
+          <button class="btn btn-success btn-sm" onclick="toggleProduct(${p.id})">${p.enabled?'下架':'上架'}</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteProduct(${p.id})">删除</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+// ===== 卡券管理 =====
+function renderCoupons() {
+  const el = document.getElementById('couponList');
+  if (!D.coupons.length) {
+    el.innerHTML = '<div style="text-align:center;color:#94a3b8;padding:40px;font-size:14px;">暂无卡券，点击右上角添加</div>';
+    return;
+  }
+  el.innerHTML = D.coupons.map(c => {
+    const count = c.items?.length||0;
+    const isLow = count <= D.config.lowStock;
+    return `
+      <div class="coupon-card">
+        <div class="coupon-icon">${c.icon||'🎫'}</div>
+        <div class="coupon-info">
+          <div class="coupon-name">${c.name}</div>
+          <div class="coupon-meta">关联商品：${D.products.find(p=>p.id==c.productId)?.name||'通用'} · 最后入库：${c.lastImport||'暂无'}</div>
+        </div>
+        <div style="text-align:right;">
+          <div class="coupon-stock" style="color:${isLow?'#ef4444':'#1a1d29'}">${count}</div>
+          <div style="font-size:11px;color:#94a3b8;">${isLow?'⚠️低库存':''} 张</div>
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-success btn-sm" onclick="openModal('batchImport',${c.id})">入库</button>
+          <button class="btn btn-outline btn-sm" onclick="openModal('viewCoupon',${c.id})">查看</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteCoupon(${c.id})">删除</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ===== 订单管理 =====
+let orderTab = 'all';
+function setOrderTab(status) {
+  orderTab = status;
+  document.querySelectorAll('#orderTabs .tab').forEach(t => t.classList.remove('active'));
+  document.querySelector(`#orderTabs [data-status="${status}"]`)?.classList.add('active');
+  renderOrders();
+}
+
+function renderOrders() {
+  const tbody = document.getElementById('ordersTable');
+  let orders = D.orders;
+  if (orderTab !== 'all') orders = orders.filter(o => o.status === orderTab);
+  orders = orders.slice().reverse();
+
+  if (!orders.length) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#94a3b8;padding:30px;">暂无订单</td></tr>';
+    return;
+  }
+  tbody.innerHTML = orders.map(o => `
+    <tr>
+      <td><span style="font-family:monospace;font-size:12px;color:#64748b;">${o.id}</span></td>
+      <td>${o.buyer||'-'}</td>
+      <td>${o.product||'-'}</td>
+      <td><span style="font-family:monospace;font-size:12px;color:#64748b;max-width:120px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${o.content||'-'}</span></td>
+      <td>¥${o.amount||'0'}</td>
+      <td><span class="tag ${getStatusTag(o.status)}">${o.status||'未知'}</span></td>
+      <td style="font-size:12px;color:#94a3b8;">${o.time||''}</td>
+      <td>
+        ${o.status==='待发货'?`<button class="btn btn-success btn-sm" onclick="shipOrder('${o.id}')">发货</button>`:''}
+        <button class="btn btn-danger btn-sm" onclick="deleteOrder('${o.id}')">删除</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+// ===== 自动发货 =====
+function renderDelivery() {
+  const total = D.orders.length;
+  const sent = D.orders.filter(o => o.status==='已发货'||o.status==='已完成').length;
+  const pending = D.orders.filter(o => o.status==='待发货').length;
+  document.getElementById('del-total').textContent = total;
+  document.getElementById('del-sent').textContent = sent;
+  document.getElementById('del-pending').textContent = pending;
+
+  const sel = document.getElementById('del-product');
+  sel.innerHTML = '<option value="">-- 选择商品 --</option>' +
+    D.coupons.map(c => `<option value="${c.id}">${c.name} (库存:${c.items?.length||0})</option>`).join('');
+
+  const tplList = document.getElementById('templateList');
+  tplList.innerHTML = D.templates.map(t => `
+    <div style="background:#f8fafc;border-radius:10px;padding:12px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div style="font-size:13.5px;font-weight:700;color:#1a1d29;">${t.name}</div>
+        <div style="font-size:12px;color:#64748b;margin-top:2px;font-family:monospace;">${t.content.substring(0,60)}...</div>
+      </div>
+      <button class="btn btn-danger btn-sm" onclick="deleteTemplate(${t.id})">删除</button>
+    </div>
+  `).join('');
+}
+
+function loadDeliveryContent() {
+  const pid = document.getElementById('del-product').value;
+  if (!pid) { document.getElementById('del-content').value = ''; return; }
+  const c = D.coupons.find(x => x.id == pid);
+  if (!c || !c.items?.length) {
+    document.getElementById('del-content').value = '⚠️ 无库存！';
+    return;
+  }
+  const card = c.items[0];
+  const tpl = D.templates[0]||{content:'{card}'};
+  document.getElementById('del-content').value = tpl.content.replace('{card}', card);
+}
+
+function autoDelivery() {
+  const pid = document.getElementById('del-product').value;
+  if (!pid) { toast('请选择商品','err'); return; }
+  const c = D.coupons.find(x => x.id == pid);
+  if (!c?.items?.length) { toast('无库存！','err'); return; }
+  const card = c.items.splice(0,1)[0];
+  const tpl = D.templates[0]||{content:'{card}'};
+  const content = tpl.content.replace('{card}', card);
+  const orderId = 'XD' + Date.now();
+  D.orders.unshift({
+    id: orderId, buyer: document.getElementById('del-buyer-note').value||'自动发货',
+    product: c.name, content: card, amount: '0.00', status: '已发货',
+    time: new Date().toLocaleString('zh-CN')
+  });
+  saveData(D);
+  document.getElementById('del-content').value = content;
+  renderAll();
+  toast('发货成功！库存已扣减','ok');
+}
+
+function copyDeliveryContent() {
+  const text = document.getElementById('del-content').value;
+  if (!text) { toast('内容为空','err'); return; }
+  copyText(text);
+}
+
+function clearDelivery() {
+  document.getElementById('del-product').value = '';
+  document.getElementById('del-buyer-note').value = '';
+  document.getElementById('del-content').value = '';
+}
+
+function shipOrder(id) {
+  const o = D.orders.find(x => x.id === id);
+  if (o) { o.status = '已发货'; saveData(D); renderAll(); toast('已标记发货'); }
+}
+
+// ===== 账号 =====
+function renderAccounts() {
+  const el = document.getElementById('accountList');
+  if (!D.accounts.length) {
+    el.innerHTML = '<div style="font-size:12px;color:#4a5568;padding:4px 10px;">点击右侧添加账号</div>';
+  } else {
+    el.innerHTML = D.accounts.map(a => `
+      <div class="account-pill ${D.currentAccount===a.id?'active':''}" onclick="switchAccount(${a.id})">
+        <div class="avatar">${a.name[0]?.toUpperCase()||'?'}</div>
+        <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${a.name}</span>
+        ${a.online?'<div class="online-dot"></div>':''}
+      </div>
+    `).join('');
+  }
+  const cur = D.accounts.find(a => a.id === D.currentAccount);
+  document.getElementById('currentAccountName').textContent = cur?.name||'未登录';
+}
+
+function renderAccountsPage() {
+  const el = document.getElementById('accountsList');
+  if (!D.accounts.length) {
+    el.innerHTML = '<div class="card"><div class="card-body" style="text-align:center;color:#94a3b8;padding:40px;font-size:14px;">暂无账号，点击右上角添加</div></div>';
+    return;
+  }
+  el.innerHTML = D.accounts.map(a => `
+    <div class="coupon-card" style="margin-bottom:10px;">
+      <div class="coupon-icon">👤</div>
+      <div class="coupon-info">
+        <div class="coupon-name">${a.name}</div>
+        <div class="coupon-meta">添加于 ${a.addedAt||'未知'}</div>
+      </div>
+      ${a.online?'<span class="tag tag-green">在线</span>':'<span class="tag tag-gray">离线</span>'}
+      <div class="btn-group">
+        ${D.currentAccount===a.id?`<button class="btn btn-outline btn-sm" disabled>当前账号</button>`:`<button class="btn btn-primary btn-sm" onclick="switchAccount(${a.id})">切换</button>`}
+        <button class="btn btn-danger btn-sm" onclick="deleteAccount(${a.id})">删除</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function switchAccount(id) {
+  D.currentAccount = id;
+  saveData(D);
+  renderAccounts();
+  toast('已切换账号');
+}
+
+// ===== 设置 =====
+function renderConfig() {
+  document.getElementById('cfg-account').value = D.config.account||'';
+  document.getElementById('cfg-delivery-note').value = D.config.deliveryNote||'';
+  document.getElementById('cfg-lowstock').value = D.config.lowStock||5;
+}
+
+function saveConfig() {
+  D.config = {
+    account: document.getElementById('cfg-account').value,
+    deliveryNote: document.getElementById('cfg-delivery-note').value,
+    lowStock: parseInt(document.getElementById('cfg-lowstock').value)||5
+  };
+  saveData(D);
+  renderAccounts();
+  toast('设置已保存','ok');
+}
+
+function updateDataSize() {
+  const raw = localStorage.getItem(KEY)||'';
+  const kb = (raw.length / 1024).toFixed(1);
+  const el = document.getElementById('dataSize');
+  if (el) el.textContent = kb + ' KB';
+}
+
+// ===== CRUD =====
+function addRule(keywords, reply, product, matchMode) {
+  D.rules.push({id:Date.now(), keywords:keywords.split(',').map(k=>k.trim()), reply, product, matchMode:matchMode||'fuzzy', enabled:true});
+  saveData(D); renderRules();
+}
+function toggleRule(id) {
+  const r = D.rules.find(x=>x.id===id);
+  if (r) { r.enabled = !r.enabled; saveData(D); }
+}
+function deleteRule(id) {
+  if (!confirm('删除此规则？')) return;
+  D.rules = D.rules.filter(r=>r.id!==id);
+  saveData(D); renderRules();
+}
+function addQuickReply(keyword, reply) {
+  D.quickReplies.push({id:Date.now(), keyword, reply, label:keyword});
+  saveData(D); renderQuickReplies(); renderCSReplies();
+}
+function deleteQuickReply(id) {
+  D.quickReplies = D.quickReplies.filter(q=>q.id!==id);
+  saveData(D); renderQuickReplies(); renderCSReplies();
+}
+function addProduct(name, category, price) {
+  D.products.push({id:Date.now(), name, category, price:parseFloat(price)||0, stock:0, enabled:true});
+  saveData(D); renderProducts();
+}
+function toggleProduct(id) {
+  const p = D.products.find(x=>x.id===id);
+  if (p) { p.enabled=!p.enabled; saveData(D); renderProducts(); }
+}
+function deleteProduct(id) {
+  if (!confirm('删除此商品？')) return;
+  D.products = D.products.filter(p=>p.id!==id);
+  saveData(D); renderProducts();
+}
+function addCoupon(name, icon, productId) {
+  D.coupons.push({id:Date.now(), name, icon:icon||'🎫', productId, items:[], lastImport:''});
+  saveData(D); renderCoupons();
+}
+function addInventoryToCoupon(couponId, items) {
+  const c = D.coupons.find(x=>x.id===couponId);
+  if (!c) return;
+  const newItems = items.split('\n').map(i=>i.trim()).filter(i=>i);
+  c.items = c.items.concat(newItems);
+  c.lastImport = new Date().toLocaleDateString('zh-CN');
+  saveData(D); renderCoupons(); renderDashboard();
+}
+function deleteCoupon(id) {
+  if (!confirm('删除此卡券分类？')) return;
+  D.coupons = D.coupons.filter(c=>c.id!==id);
+  saveData(D); renderCoupons();
+}
+function addOrder(buyer, product, amount, status, content) {
+  D.orders.unshift({id:'XD'+Date.now(), buyer, product, amount:parseFloat(amount)||0, content, status:status||'待发货', time:new Date().toLocaleString('zh-CN')});
+  saveData(D); renderOrders(); renderDashboard(); renderDelivery();
+}
+function deleteOrder(id) {
+  if (!confirm('删除此订单？')) return;
+  D.orders = D.orders.filter(o=>o.id!==id);
+  saveData(D); renderOrders(); renderDashboard(); renderDelivery();
+}
+function addAccount(name) {
+  D.accounts.push({id:Date.now(), name, online:true, addedAt:new Date().toLocaleDateString('zh-CN')});
+  D.currentAccount = D.accounts[D.accounts.length-1].id;
+  saveData(D); renderAccounts(); renderAccountsPage();
+  toast('账号已添加','ok');
+}
+function deleteAccount(id) {
+  if (!confirm('删除此账号？')) return;
+  D.accounts = D.accounts.filter(a=>a.id!==id);
+  if (D.currentAccount===id) D.currentAccount = D.accounts[0]?.id||null;
+  saveData(D); renderAccounts(); renderAccountsPage();
+}
+function addTemplate(name, content) {
+  D.templates.push({id:Date.now(), name, content});
+  saveData(D); renderDelivery();
+}
+function deleteTemplate(id) {
+  D.templates = D.templates.filter(t=>t.id!==id);
+  saveData(D); renderDelivery();
+}
+
+// ===== Modal =====
+function openModal(type, extra) {
+  const body = document.getElementById('modalBody');
+  const foot = document.getElementById('modalFoot');
+  const title = document.getElementById('modalTitle');
+  let html = '', footHtml = '';
+
+  if (type==='addRule') {
+    title.textContent = '添加自动回复规则';
+    html = `
+      <div class="form-group"><label class="form-label">触发关键词（多个用英文逗号分隔）</label><input class="form-input" id="m-keywords" placeholder="如：发货,怎么发,发货时间"></div>
+      <div class="form-group"><label class="form-label">指定商品（可选）</label>
+        <select class="form-select" id="m-product">
+          <option value="">全局规则（所有商品适用）</option>
+          ${D.products.map(p=>`<option value="${p.name}">${p.name}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">匹配模式</label>
+        <select class="form-select" id="m-mode">
+          <option value="fuzzy">模糊匹配（含关键词即触发）</option>
+          <option value="exact">精确匹配（完全相同才触发）</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">回复内容</label><textarea class="form-textarea" id="m-reply" placeholder="输入自动回复内容..."></textarea></div>`;
+    footHtml = `<button class="btn btn-outline" onclick="closeModal()">取消</button><button class="btn btn-primary" onclick="addRule(document.getElementById('m-keywords').value,document.getElementById('m-reply').value,document.getElementById('m-product').value,document.getElementById('m-mode').value);closeModal()">保存</button>`;
+  } else if (type==='addQuickReply') {
+    title.textContent = '添加快捷话术';
+    html = `<div class="form-group"><label class="form-label">话术标签</label><input class="form-input" id="m-qr-label" placeholder="如：发货通知"></div><div class="form-group"><label class="form-label">话术内容</label><textarea class="form-textarea" id="m-qr-reply" placeholder="输入完整话术..."></textarea></div>`;
+    footHtml = `<button class="btn btn-outline" onclick="closeModal()">取消</button><button class="btn btn-primary" onclick="addQuickReply(document.getElementById('m-qr-label').value,document.getElementById('m-qr-reply').value);closeModal()">保存</button>`;
+  } else if (type==='addProduct') {
+    title.textContent = '添加商品';
+    html = `<div class="form-group"><label class="form-label">商品名称</label><input class="form-input" id="m-prod-name" placeholder="如：王者荣耀点券"></div><div class="form-row"><div class="form-group"><label class="form-label">分类</label><input class="form-input" id="m-prod-cat" placeholder="如：游戏充值"></div><div class="form-group"><label class="form-label">价格</label><input class="form-input" id="m-prod-price" placeholder="0.00" type="number" step="0.01"></div></div>`;
+    footHtml = `<button class="btn btn-outline" onclick="closeModal()">取消</button><button class="btn btn-primary" onclick="addProduct(document.getElementById('m-prod-name').value,document.getElementById('m-prod-cat').value,document.getElementById('m-prod-price').value);closeModal()">添加</button>`;
+  } else if (type==='addCoupon') {
+    title.textContent = '添加卡券分类';
+    html = `<div class="form-group"><label class="form-label">卡券名称</label><input class="form-input" id="m-coupon-name" placeholder="如：王者荣耀点券卡密"></div><div class="form-group"><label class="form-label">关联商品</label><select class="form-select" id="m-coupon-prod"><option value="">通用（不关联商品）</option>${D.products.map(p=>`<option value="${p.id}">${p.name}</option>`).join('')}</select></div><div class="form-group"><label class="form-label">图标 Emoji</label><input class="form-input" id="m-coupon-icon" placeholder="🎫" value="🎫"></div>`;
+    footHtml = `<button class="btn btn-outline" onclick="closeModal()">取消</button><button class="btn btn-primary" onclick="addCoupon(document.getElementById('m-coupon-name').value,document.getElementById('m-coupon-icon').value,document.getElementById('m-coupon-prod').value);closeModal()">添加</button>`;
+  } else if (type==='batchImport') {
+    const c = D.coupons.find(x=>x.id===extra);
+    title.textContent = '批量入库 - ' + (c?.name||'');
+    html = `<div class="form-group"><label class="form-label">卡密内容（一行一个）</label><textarea class="form-textarea" id="m-batch" placeholder="ABCD-1234-EFGH\nIJKL-5678-MNOP" style="min-height:160px;font-family:monospace;"></textarea></div>`;
+    footHtml = `<button class="btn btn-outline" onclick="closeModal()">取消</button><button class="btn btn-success" onclick="addInventoryToCoupon(${extra},document.getElementById('m-batch').value);closeModal()">确认入库</button>`;
+  } else if (type==='viewCoupon') {
+    const c = D.coupons.find(x=>x.id===extra);
+    title.textContent = '查看卡券 - ' + (c?.name||'');
+    const items = (c?.items||[]);
+    html = `<div style="font-size:13px;color:#64748b;margin-bottom:12px;">共 ${items.length} 条库存</div>
+      <div style="max-height:300px;overflow-y:auto;background:#f8fafc;border-radius:10px;padding:12px;">
+        ${items.length ? items.map((item,i)=>`<div style="font-family:monospace;font-size:12px;padding:4px 0;border-bottom:1px solid #e8ecf0;color:#475569;">${i+1}. ${item}</div>`).join('') : '<div style="color:#94a3b8;text-align:center;padding:20px;">暂无库存</div>'}
+      </div>`;
+    footHtml = `<button class="btn btn-outline" onclick="closeModal()">关闭</button>`;
+  } else if (type==='addOrder') {
+    title.textContent = '手动录单';
+    html = `<div class="form-row"><div class="form-group"><label class="form-label">买家</label><input class="form-input" id="m-ord-buyer" placeholder="买家昵称"></div><div class="form-group"><label class="form-label">商品</label><input class="form-input" id="m-ord-prod" placeholder="商品名称"></div></div><div class="form-row"><div class="form-group"><label class="form-label">金额</label><input class="form-input" id="m-ord-amount" placeholder="0.00" type="number" step="0.01"></div><div class="form-group"><label class="form-label">状态</label><select class="form-select" id="m-ord-status"><option value="待发货">待发货</option><option value="已发货">已发货</option><option value="已完成">已完成</option></select></div></div><div class="form-group"><label class="form-label">卡密/内容</label><textarea class="form-textarea" id="m-ord-content" placeholder="卡密或内容..."></textarea></div>`;
+    footHtml = `<button class="btn btn-outline" onclick="closeModal()">取消</button><button class="btn btn-primary" onclick="addOrder(document.getElementById('m-ord-buyer').value,document.getElementById('m-ord-prod').value,document.getElementById('m-ord-amount').value,document.getElementById('m-ord-status').value,document.getElementById('m-ord-content').value);closeModal()">保存</button>`;
+  } else if (type==='addAccount') {
+    title.textContent = '添加账号';
+    html = `<div class="form-group"><label class="form-label">账号名称</label><input class="form-input" id="m-acc-name" placeholder="如：我的闲鱼账号"></div>`;
+    footHtml = `<button class="btn btn-outline" onclick="closeModal()">取消</button><button class="btn btn-primary" onclick="addAccount(document.getElementById('m-acc-name').value);closeModal()">添加</button>`;
+  } else if (type==='addTemplate') {
+    title.textContent = '添加发货模板';
+    html = `<div class="form-group"><label class="form-label">模板名称</label><input class="form-input" id="m-tpl-name" placeholder="如：迅雷会员"></div><div class="form-group"><label class="form-label">模板内容（{card}为卡密占位符）</label><textarea class="form-textarea" id="m-tpl-content" placeholder="【卡密】{card}" style="min-height:100px;font-family:monospace;"></textarea></div>`;
+    footHtml = `<button class="btn btn-outline" onclick="closeModal()">取消</button><button class="btn btn-primary" onclick="addTemplate(document.getElementById('m-tpl-name').value,document.getElementById('m-tpl-content').value);closeModal()">保存</button>`;
+  }
+
+  body.innerHTML = html;
+  foot.innerHTML = footHtml;
+  document.getElementById('modalOverlay').classList.add('show');
+}
+
+function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
+document.getElementById('modalOverlay').addEventListener('click', e => { if (e.target===document.getElementById('modalOverlay')) closeModal(); });
+
+// ===== 工具 =====
+function copyText(text) {
+  navigator.clipboard.writeText(text).then(()=>toast('已复制','ok')).catch(()=>{
+    const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);toast('已复制','ok');
+  });
+}
+function getStatusTag(s) {
+  if (s==='待发货') return 'tag-yellow';
+  if (s==='已发货') return 'tag-blue';
+  if (s==='已完成') return 'tag-green';
+  return 'tag-gray';
+}
+function toast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast show ' + type;
+  setTimeout(()=>t.classList.remove('show'), 2500);
+}
+
+// ===== 数据导入导出 =====
+function exportData() {
+  const blob = new Blob([JSON.stringify(D,null,2)],{type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `闲鱼运营数据_${new Date().toLocaleDateString('zh-CN').replace(/\//g,'-')}.json`;
+  a.click();
+  toast('数据已导出','ok');
+}
+function importData(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    try {
+      D = JSON.parse(ev.target.result);
+      saveData(D);
+      renderAll();
+      toast('导入成功','ok');
+    } catch(err) { toast('导入失败','err'); }
+  };
+  reader.readAsText(file);
+}
+function clearAll() { localStorage.removeItem(KEY); location.reload(); }
+
+// ===== 全局搜索 =====
+function globalSearch() {
+  const q = document.getElementById('globalSearch').value.trim().toLowerCase();
+  if (!q) return;
+  const matchedOrders = D.orders.filter(o => (o.id+o.buyer+o.product+o.content).toLowerCase().includes(q));
+  const matchedCoupons = D.coupons.filter(c => c.name.toLowerCase().includes(q) || (c.items||[]).some(i=>i.toLowerCase().includes(q)));
+  let msg = '';
+  if (matchedOrders.length) msg += `找到 ${matchedOrders.length} 条相关订单\n`;
+  if (matchedCoupons.length) msg += `找到 ${matchedCoupons.length} 个相关卡券\n`;
+  if (!msg) msg = '未找到匹配结果';
+  alert(msg);
+}
+
+// ===== 初始化默认数据 =====
+if (!D.rules.length) {
+  D.rules = [
+    {id:1, keywords:['发货'], reply:'亲，付款后5分钟内发货，收到卡密请第一时间激活使用~', product:'', matchMode:'fuzzy', enabled:true},
+    {id:2, keywords:['价格'], reply:'您好，商品价格已经是最低价了哦，需要可以直接拍下~', product:'', matchMode:'fuzzy', enabled:true},
+    {id:3, keywords:['退款'], reply:'虚拟商品特殊性质，售出后不支持退款，介意的话可以先了解商品详情再决定~', product:'', matchMode:'fuzzy', enabled:true},
+    {id:4, keywords:['激活'], reply:'激活方法：打开对应App → 我的 → 充值/兑换 → 输入卡密即可。遇到问题随时私信我~', product:'', matchMode:'fuzzy', enabled:true},
+  ];
+}
+if (!D.quickReplies.length) {
+  D.quickReplies = [
+    {id:1, keyword:'发货通知', reply:'您好！您的订单已发货，请查收~激活遇到问题随时私信我！', label:'发货通知'},
+    {id:2, keyword:'活动优惠', reply:'本店商品均为平台低价，欢迎货比三家后再决定~', label:'活动优惠'},
+    {id:3, keyword:'卡密问题', reply:'收到卡密后如无法激活，请提供截图，我会尽快为您处理！', label:'卡密问题'},
+  ];
+}
+saveData(D);
+renderAll();
+</script>
+</body>
+</html>

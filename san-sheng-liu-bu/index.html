@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>三省六部 · AI朝廷系统</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: linear-gradient(135deg, #1a1d29 0%, #2d1f3d 100%);
+      min-height: 100vh;
+      color: #333;
+    }
+    
+    /* ===== 顶部导航 ===== */
+    .top-nav {
+      background: rgba(26, 29, 41, 0.95);
+      backdrop-filter: blur(20px);
+      padding: 0 24px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .nav-brand {
+      color: #f0c040;
+      font-size: 20px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .nav-brand .icon { font-size: 26px; }
+    .nav-actions { display: flex; gap: 12px; }
+    .nav-btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.05);
+      color: #c8d0e0;
+      transition: all 0.2s;
+    }
+    .nav-btn:hover { background: rgba(255,255,255,0.12); }
+    
+    /* ===== 主容器 ===== */
+    .main-container {
+      padding-top: 80px;
+      max-width: 1600px;
+      margin: 0 auto;
+      padding-bottom: 40px;
+    }
+    
+    /* ===== 御书房 ===== */
+    .throne-room {
+      background: linear-gradient(135deg, #f0c040 0%, #e6a030 100%);
+      margin: 20px;
+      border-radius: 16px;
+      padding: 32px;
+      text-align: center;
+      box-shadow: 0 8px 32px rgba(240, 192, 64, 0.3);
+    }
+    .throne-room h1 {
+      color: #1a1d29;
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+    .throne-room p { color: rgba(26,29,41,0.7); font-size: 14px; }
+    .throne-room .divider {
+      width: 60px;
+      height: 3px;
+      background: #1a1d29;
+      margin: 16px auto;
+      border-radius: 2px;
+    }
+    
+    /* ===== 任务输入区 ===== */
+    .task-input-area {
+      background: white;
+      margin: 0 20px 20px;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    .task-input-area h3 {
+      font-size: 15px;
+      color: #555;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .task-input-area h3 .icon { font-size: 18px; }
+    .input-row { display: flex; gap: 12px; }
+    .task-input {
+      flex: 1;
+      padding: 14px 18px;
+      border: 2px solid #e8ecf0;
+      border-radius: 10px;
+      font-size: 15px;
+      outline: none;
+      transition: all 0.2s;
+    }
+    .task-input:focus { border-color: #f0c040; }
+    .submit-btn {
+      padding: 14px 32px;
+      background: linear-gradient(135deg, #f0c040 0%, #e6a030 100%);
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      color: #1a1d29;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(240,192,64,0.4); }
+    
+    /* ===== 三省区 ===== */
+    .three-provinces {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin: 0 20px 20px;
+    }
+    .province {
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+    .province-header {
+      padding: 16px 20px;
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .province-header .icon { font-size: 24px; }
+    .province-header .title { font-size: 16px; font-weight: 700; }
+    .province-header .subtitle { font-size: 11px; opacity: 0.85; }
+    
+    .province-zs { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .province-ms { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+    .province-sb { background: linear-gradient(135deg, #fc4a1a 0%, #f7b733 100%); }
+    
+    .province-body { padding: 16px; }
+    
+    /* ===== Agent卡片 ===== */
+    .agent-card {
+      background: #f8f9fa;
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 10px;
+      border-left: 4px solid;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    .agent-card:hover { transform: translateX(4px); box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+    .agent-card.zhongshu { border-color: #667eea; }
+    .agent-card:where(.shmen,.youshi) { border-color: #11998e; }
+    .agent-card:where(.xingbu,.hubu,.libu,.gongbu) { border-color: #fc4a1a; }
+    
+    .agent-name {
+      font-weight: 700;
+      font-size: 14px;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .agent-name .badge {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+    .agent-name .badge.active { background: #10b981; color: white; }
+    .agent-name .badge.idle { background: #e8ecf0; color: #666; }
+    .agent-desc { font-size: 12px; color: #888; }
+    .agent-status {
+      font-size: 11px;
+      color: #666;
+      margin-top: 8px;
+      padding: 8px;
+      background: white;
+      border-radius: 6px;
+    }
+    .agent-status.working { border-left: 3px solid #f0c040; }
+    .agent-status.done { border-left: 3px solid #10b981; }
+    
+    /* ===== 六部 ===== */
+    .six-ministries {
+      margin: 0 20px;
+    }
+    .ministries-title {
+      color: white;
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .ministries-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 12px;
+    }
+    .ministry {
+      background: white;
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      transition: all 0.2s;
+    }
+    .ministry:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+    .ministry .icon { font-size: 32px; margin-bottom: 8px; }
+    .ministry .name { font-weight: 700; font-size: 14px; margin-bottom: 4px; }
+    .ministry .role { font-size: 11px; color: #888; margin-bottom: 8px; }
+    .ministry .task-count {
+      font-size: 20px;
+      font-weight: 700;
+      color: #f0c040;
+    }
+    .ministry .task-label { font-size: 10px; color: #999; }
+    
+    /* ===== 任务流转 ===== */
+    .task-flow {
+      margin: 20px;
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    .task-flow h3 {
+      font-size: 16px;
+      color: #1a1d29;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .flow-container { display: flex; align-items: center; gap: 8px; overflow-x: auto; padding: 8px 0; }
+    .flow-step {
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .flow-step.pending { background: #f0f0f0; color: #999; }
+    .flow-step.active { background: #f0c040; color: #1a1d29; animation: pulse 1.5s infinite; }
+    .flow-step.done { background: #10b981; color: white; }
+    .flow-arrow { color: #ccc; font-size: 18px; }
+    
+    @keyframes pulse {
+      0%,100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    
+    /* ===== 当前任务 ===== */
+    .current-tasks {
+      margin: 20px;
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    .current-tasks h3 {
+      font-size: 16px;
+      color: #1a1d29;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .task-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px;
+      background: #f8f9fa;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      border-left: 4px solid;
+    }
+    .task-item.todo { border-color: #94a3b8; }
+    .task-item.doing { border-color: #f0c040; }
+    .task-item.done { border-color: #10b981; }
+    .task-item .task-info { flex: 1; }
+    .task-item .task-title { font-weight: 600; font-size: 14px; }
+    .task-item .task-meta { font-size: 12px; color: #888; margin-top: 4px; }
+    .task-item .task-agent {
+      padding: 4px 10px;
+      background: #667eea;
+      color: white;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    
+    /* ===== 响应面板 ===== */
+    .response-panel {
+      margin: 20px;
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      display: none;
+    }
+    .response-panel.show { display: block; }
+    .response-panel h3 {
+      font-size: 16px;
+      color: #1a1d29;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .response-content {
+      background: #f8f9fa;
+      border-radius: 12px;
+      padding: 20px;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    .response-section {
+      margin-bottom: 16px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #eee;
+    }
+    .response-section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    .response-title {
+      font-weight: 700;
+      font-size: 13px;
+      color: #667eea;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .response-text { font-size: 14px; line-height: 1.8; color: #444; }
+    
+    /* ===== Toast ===== */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #1a1d29;
+      color: white;
+      padding: 14px 28px;
+      border-radius: 10px;
+      font-size: 14px;
+      opacity: 0;
+      transition: all 0.3s;
+      z-index: 2000;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+    
+    /* ===== 响应式 ===== */
+    @media (max-width: 1200px) {
+      .three-provinces { grid-template-columns: 1fr; }
+      .ministries-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 768px) {
+      .ministries-grid { grid-template-columns: repeat(2, 1fr); }
+      .input-row { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <!-- 顶部导航 -->
+  <div class="top-nav">
+    <div class="nav-brand">
+      <span class="icon">🏛️</span>
+      <span>三省六部</span>
+    </div>
+    <div class="nav-actions">
+      <button class="nav-btn" onclick="showStats()">📊 统计</button>
+      <button class="nav-btn" onclick="clearAll()">🗑️ 清空</button>
+      <button class="nav-btn" onclick="exportData()">💾 导出</button>
+    </div>
+  </div>
+  
+  <div class="main-container">
+    <!-- 御书房 -->
+    <div class="throne-room">
+      <h1>🏛️ 三省六部 · AI朝廷系统</h1>
+      <div class="divider"></div>
+      <p>中书省拟旨 · 门下省审议 · 尚书省执行 · 六部各司其职</p>
+    </div>
+    
+    <!-- 任务输入 -->
+    <div class="task-input-area">
+      <h3><span class="icon">📜</span> 陛下请拟旨</h3>
+      <div class="input-row">
+        <input type="text" class="task-input" id="taskInput" placeholder="输入任务，如：写一篇关于AI的科普文章，并发布到公众号">
+        <button class="submit-btn" onclick="submitTask()">🚀 下旨执行</button>
+      </div>
+    </div>
+    
+    <!-- 三省 -->
+    <div class="three-provinces">
+      <!-- 中书省 -->
+      <div class="province">
+        <div class="province-header province-zs">
+          <span class="icon">📝</span>
+          <div>
+            <div class="title">中书省</div>
+            <div class="subtitle">拟旨 · 起草诏令</div>
+          </div>
+        </div>
+        <div class="province-body">
+          <div class="agent-card zhongshu" onclick="showAgentDetail('neige')">
+            <div class="agent-name">
+              内阁首辅
+              <span class="badge active">在线</span>
+            </div>
+            <div class="agent-desc">诏令起草、议题规划、策略制定</div>
+            <div class="agent-status" id="neige-status">空闲中...</div>
+          </div>
+          <div class="agent-card zhongshu" onclick="showAgentDetail('zhongshu')">
+            <div class="agent-name">
+              中书舍人
+              <span class="badge idle">待命</span>
+            </div>
+            <div class="agent-desc">文书撰写、格式规范、润色优化</div>
+            <div class="agent-status">空闲中...</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 门下省 -->
+      <div class="province">
+        <div class="province-header province-ms">
+          <span class="icon">⚖️</span>
+          <div>
+            <div class="title">门下省</div>
+            <div class="subtitle">审议 · 审核驳回</div>
+          </div>
+        </div>
+        <div class="province-body">
+          <div class="agent-card shmen" onclick="showAgentDetail('shmen')">
+            <div class="agent-name">
+              侍中
+              <span class="badge active">在线</span>
+            </div>
+            <div class="agent-desc">政策审议、可行性分析、风险评估</div>
+            <div class="agent-status" id="shmen-status">空闲中...</div>
+          </div>
+          <div class="agent-card shmen" onclick="showAgentDetail('yushi')">
+            <div class="agent-name">
+              御史大夫
+              <span class="badge active">在线</span>
+            </div>
+            <div class="agent-desc">监察审计、纠察弹劾、质量把控</div>
+            <div class="agent-status" id="yushi-status">空闲中...</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 尚书省 -->
+      <div class="province">
+        <div class="province-header province-sb">
+          <span class="icon">⚔️</span>
+          <div>
+            <div class="title">尚书省</div>
+            <div class="subtitle">执行 · 统领六部</div>
+          </div>
+        </div>
+        <div class="province-body">
+          <div class="agent-card" onclick="showAgentDetail('shangshu')">
+            <div class="agent-name">
+              尚书令
+              <span class="badge active">在线</span>
+            </div>
+            <div class="agent-desc">总揽政务、协调六部、督促进度</div>
+            <div class="agent-status" id="shangshu-status">空闲中...</div>
+          </div>
+          <div class="agent-card" onclick="showAgentDetail('shangshuLang')">
+            <div class="agent-name">
+              尚书郎
+              <span class="badge idle">待命</span>
+            </div>
+            <div class="agent-desc">事务分发、流程跟进、文书传递</div>
+            <div class="agent-status">空闲中...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 六部 -->
+    <div class="six-ministries">
+      <div class="ministries-title">⚔️ 六部各司其职</div>
+      <div class="ministries-grid">
+        <div class="ministry" onclick="showMinister('libu')">
+          <div class="icon">👔</div>
+          <div class="name">吏部</div>
+          <div class="role">官员任免</div>
+          <div class="task-count" id="libu-count">0</div>
+          <div class="task-label">任务</div>
+        </div>
+        <div class="ministry" onclick="showMinister('hubu')">
+          <div class="icon">💰</div>
+          <div class="name">户部</div>
+          <div class="role">财务账目</div>
+          <div class="task-count" id="hubu-count">0</div>
+          <div class="task-label">任务</div>
+        </div>
+        <div class="ministry" onclick="showMinister('libu2')">
+          <div class="icon">🎁</div>
+          <div class="name">礼部</div>
+          <div class="role">礼仪外交</div>
+          <div class="task-count" id="libu2-count">0</div>
+          <div class="task-label">任务</div>
+        </div>
+        <div class="ministry" onclick="showMinister('bingbu')">
+          <div class="icon">⚔️</div>
+          <div class="name">兵部</div>
+          <div class="role">军政武备</div>
+          <div class="task-count" id="bingbu-count">0</div>
+          <div class="task-label">任务</div>
+        </div>
+        <div class="ministry" onclick="showMinister('xingbu')">
+          <div class="icon">⚖️</div>
+          <div class="name">刑部</div>
+          <div class="role">律法刑狱</div>
+          <div class="task-count" id="xingbu-count">0</div>
+          <div class="task-label">任务</div>
+        </div>
+        <div class="ministry" onclick="showMinister('gongbu')">
+          <div class="icon">🏗️</div>
+          <div class="name">工部</div>
+          <div class="role">工程营建</div>
+          <div class="task-count" id="gongbu-count">0</div>
+          <div class="task-label">任务</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 任务流转 -->
+    <div class="task-flow">
+      <h3>🔄 任务流转图</h3>
+      <div class="flow-container" id="flowContainer">
+        <div class="flow-step pending" id="flow-submit">
+          <span>📜</span> 陛下下旨
+        </div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step pending" id="flow-neige">
+          <span>📝</span> 中书省拟旨
+        </div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step pending" id="flow-shmen">
+          <span>⚖️</span> 门下省审议
+        </div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step pending" id="flow-shangshu">
+          <span>⚔️</span> 尚书省执行
+        </div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step pending" id="flow-ministry">
+          <span>🏛️</span> 六部承办
+        </div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step pending" id="flow-done">
+          <span>✅</span> 任务完成
+        </div>
+      </div>
+    </div>
+    
+    <!-- 当前任务列表 -->
+    <div class="current-tasks">
+      <h3>📋 当前任务 <span id="taskCount"></span></h3>
+      <div id="taskList"></div>
+    </div>
+    
+    <!-- 响应面板 -->
+    <div class="response-panel" id="responsePanel">
+      <h3>📤 朝廷批复</h3>
+      <div class="response-content" id="responseContent"></div>
+    </div>
+  </div>
+  
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+<script>
+// ==================== 数据结构 ====================
+const STORAGE_KEY = 'san_sheng_liu_bu_data';
+
+function getData() {
+  const d = localStorage.getItem(STORAGE_KEY);
+  return d ? JSON.parse(d) : {
+    tasks: [],
+    stats: {
+      total: 0,
+      completed: 0,
+      agents: {}
+    }
+  };
+}
+
+function saveData(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+// ==================== Agent定义 ====================
+const AGENTS = {
+  neige: { name: '内阁首辅', province: '中书省', role: '诏令起草、策略制定', color: '#667eea' },
+  zhongshu: { name: '中书舍人', province: '中书省', role: '文书撰写、润色优化', color: '#667eea' },
+  shmen: { name: '侍中', province: '门下省', role: '政策审议、风险评估', color: '#11998e' },
+  yushi: { name: '御史大夫', province: '门下省', role: '监察审计、质量把控', color: '#11998e' },
+  shangshu: { name: '尚书令', province: '尚书省', role: '总揽政务、协调六部', color: '#fc4a1a' },
+  shangshuLang: { name: '尚书郎', province: '尚书省', role: '事务分发、流程跟进', color: '#fc4a1a' }
+};
+
+const MINISTRIES = {
+  libu: { name: '吏部', role: '官员任免', icon: '👔' },
+  hubu: { name: '户部', role: '财务账目', icon: '💰' },
+  libu2: { name: '礼部', role: '礼仪外交', icon: '🎁' },
+  bingbu: { name: '兵部', role: '军政武备', icon: '⚔️' },
+  xingbu: { name: '刑部', role: '律法刑狱', icon: '⚖️' },
+  gongbu: { name: '工部', role: '工程营建', icon: '🏗️' }
+};
+
+// ==================== 任务提交 ====================
+function submitTask() {
+  const input = document.getElementById('taskInput');
+  const taskText = input.value.trim();
+  if (!taskText) return toast('请输入任务');
+  
+  const data = getData();
+  const taskId = Date.now();
+  const task = {
+    id: taskId,
+    text: taskText,
+    status: 'todo',
+    step: 0,
+    created: new Date().toLocaleString(),
+    result: null,
+    minister: assignMinister(taskText)
+  };
+  
+  data.tasks.push(task);
+  data.stats.total++;
+  saveData(data);
+  
+  input.value = '';
+  renderTasks();
+  toast('旨意已下达，朝廷开始运作');
+  
+  // 开始自动执行
+  executeTask(taskId);
+}
+
+function assignMinister(taskText) {
+  const text = taskText.toLowerCase();
+  if (text.includes('钱') || text.includes('财务') || text.includes('预算') || text.includes('成本')) return 'hubu';
+  if (text.includes('文章') || text.includes('文案') || text.includes('宣传') || text.includes('发布') || text.includes('公众号')) return 'libu2';
+  if (text.includes('代码') || text.includes('开发') || text.includes('程序') || text.includes('网站')) return 'gongbu';
+  if (text.includes('合规') || text.includes('合同') || text.includes('法律') || text.includes('纠纷')) return 'xingbu';
+  if (text.includes('招聘') || text.includes('人事') || text.includes('团队') || text.includes('管理')) return 'libu';
+  if (text.includes('安全') || text.includes('防御') || text.includes('营销')) return 'bingbu';
+  const ministries = Object.keys(MINISTRIES);
+  return ministries[Math.floor(Math.random() * ministries.length)];
+}
+
+// ==================== 任务执行 ====================
+async function executeTask(taskId) {
+  const steps = ['neige', 'shmen', 'shangshu', 'minister', 'done'];
+  const stepNames = {
+    'neige': '中书省拟旨',
+    'shmen': '门下省审议', 
+    'shangshu': '尚书省执行',
+    'minister': '六部承办',
+    'done': '任务完成'
+  };
+  
+  const data = getData();
+  const task = data.tasks.find(t => t.id === taskId);
+  if (!task) return;
+  
+  for (let i = task.step; i < steps.length; i++) {
+    task.step = i;
+    task.status = steps[i] === 'done' ? 'done' : 'doing';
+    saveData(data);
+    
+    updateFlowChart(steps[i]);
+    updateAgentStatus(steps[i], true);
+    renderTasks();
+    
+    // 模拟处理时间
+    await sleep(1500 + Math.random() * 1000);
+    
+    // 生成结果
+    if (steps[i] === 'neige') {
+      task.draft = await generateDraft(task.text);
+    } else if (steps[i] === 'shmen') {
+      task.review = await generateReview(task.text, task.draft);
+    } else if (steps[i] === 'shangshu') {
+      task.plan = await generatePlan(task.text);
+    } else if (steps[i] === 'minister') {
+      task.result = await generateResult(task.text, task.minister);
+    }
+    
+    updateAgentStatus(steps[i], false);
+    saveData(data);
+  }
+  
+  task.status = 'done';
+  saveData(data);
+  renderTasks();
+  showResponse(task);
+  toast('任务已完成');
+}
+
+function updateFlowChart(currentStep) {
+  const steps = ['submit', 'neige', 'shmen', 'shangshu', 'minister', 'done'];
+  steps.forEach(step => {
+    const el = document.getElementById('flow-' + step);
+    if (!el) return;
+    el.className = 'flow-step';
+    if (step === currentStep) {
+      el.classList.add('active');
+    } else if (steps.indexOf(step) < steps.indexOf(currentStep)) {
+      el.classList.add('done');
+    } else {
+      el.classList.add('pending');
+    }
+  });
+}
+
+function updateAgentStatus(step, working) {
+  const agentMap = {
+    'neige': 'neige-status',
+    'shmen': 'shmen-status',
+    'yushi': 'yushi-status',
+    'shangshu': 'shangshu-status'
+  };
+  
+  const statusEl = document.getElementById(agentMap[step]);
+  if (statusEl) {
+    statusEl.textContent = working ? '处理中...' : '空闲中';
+    statusEl.className = 'agent-status' + (working ? ' working' : '');
+  }
+}
+
+// ==================== AI生成内容 ====================
+async function generateDraft(task) {
+  return `【中书省拟旨】
+经内阁首辅与中书舍人共同商议，拟定如下执行方案：
+
+■ 任务解析：
+将"${task}"拆解为以下执行要点...
+
+■ 执行策略：
+1. 明确目标与关键成果
+2. 制定分阶段实施计划
+3. 配置所需资源与人员
+4. 建立质量检查节点
+
+■ 预计工期：3-5个工作日
+■ 优先级：重要`;
+}
+
+async function generateReview(task, draft) {
+  return `【门下省审议】
+侍中与御史大夫联合审查：
+
+■ 可行性评估：
+✓ 目标明确，可执行性强
+✓ 资源需求合理
+✓ 风险可控
+
+■ 优化建议：
+· 建议增加阶段性汇报节点
+· 提醒注意内容合规性审查
+
+■ 审议结论：同意执行，已报尚书省`;
+}
+
+async function generatePlan(task) {
+  const plan = [];
+  plan.push('【尚书省执行令】');
+  plan.push('经尚书令批准，责成六部执行：');
+  plan.push('');
+  plan.push('▸ 第一阶段：准备（0.5天）');
+  plan.push('  · 资源调配与人员安排');
+  plan.push('  · 环境搭建与工具准备');
+  plan.push('');
+  plan.push('▸ 第二阶段：执行（2-3天）');
+  plan.push('  · 按方案分步实施');
+  plan.push('  · 每日进度汇报');
+  plan.push('');
+  plan.push('▸ 第三阶段：收尾（0.5天）');
+  plan.push('  · 成果校验与优化');
+  plan.push('  · 交付文档整理');
+  return plan.join('\n');
+}
+
+async function generateResult(task, minister) {
+  const ministry = MINISTRIES[minister];
+  return `【${ministry.name}承办结果】
+${ministry.icon} ${ministry.name}（${ministry.role}）执行报告：
+
+■ 任务完成情况：✅ 已完成
+
+■ 执行摘要：
+经过中书省拟旨、门下省审议、尚书省调度，现由${ministry.name}承办完成。
+
+■ 详细内容：
+${task}
+
+■ 执行部门：${ministry.name}
+■ 完成时间：${new Date().toLocaleString()}
+■ 质量评级：优秀
+
+---
+💡 提示：本结果已存档，可随时查阅。`;
+}
+
+// ==================== UI渲染 ====================
+function renderTasks() {
+  const data = getData();
+  const container = document.getElementById('taskList');
+  const taskCount = document.getElementById('taskCount');
+  
+  const activeTasks = data.tasks.filter(t => t.status !== 'done');
+  taskCount.textContent = `(${activeTasks.length})`;
+  
+  if (data.tasks.length === 0) {
+    container.innerHTML = '<div style="text-align:center;padding:40px;color:#999;">📋 暂无任务，陛下请下旨</div>';
+    return;
+  }
+  
+  container.innerHTML = data.tasks.slice().reverse().map(task => {
+    const statusMap = {
+      'todo': '待处理',
+      'doing': '执行中',
+      'done': '已完成'
+    };
+    const minister = MINISTRIES[task.minister] || { name: '待分配', icon: '❓' };
+    return `
+      <div class="task-item ${task.status}">
+        <div class="task-info">
+          <div class="task-title">${task.text}</div>
+          <div class="task-meta">
+            ${task.created} · ${statusMap[task.status]}
+          </div>
+        </div>
+        <div class="task-agent">
+          ${minister.icon} ${minister.name}
+        </div>
+      </div>
+    `;
+  }).join('');
+  
+  // 更新各部任务数
+  Object.keys(MINISTRIES).forEach(key => {
+    const count = data.tasks.filter(t => t.minister === key && t.status !== 'done').length;
+    document.getElementById(key + '-count').textContent = count;
+  });
+}
+
+function showResponse(task) {
+  const panel = document.getElementById('responsePanel');
+  const content = document.getElementById('responseContent');
+  
+  let html = '';
+  if (task.draft) {
+    html += `
+      <div class="response-section">
+        <div class="response-title">📝 中书省拟旨</div>
+        <div class="response-text">${task.draft.replace(/\n/g, '<br>')}</div>
+      </div>
+    `;
+  }
+  if (task.review) {
+    html += `
+      <div class="response-section">
+        <div class="response-title">⚖️ 门下省审议</div>
+        <div class="response-text">${task.review.replace(/\n/g, '<br>')}</div>
+      </div>
+    `;
+  }
+  if (task.plan) {
+    html += `
+      <div class="response-section">
+        <div class="response-title">⚔️ 尚书省执行令</div>
+        <div class="response-text">${task.plan.replace(/\n/g, '<br>')}</div>
+      </div>
+    `;
+  }
+  if (task.result) {
+    html += `
+      <div class="response-section">
+        <div class="response-title">🏛️ ${MINISTRIES[task.minister]?.name || '六部'}承办</div>
+        <div class="response-text">${task.result.replace(/\n/g, '<br>')}</div>
+      </div>
+    `;
+  }
+  
+  content.innerHTML = html;
+  panel.classList.add('show');
+}
+
+function showAgentDetail(agentId) {
+  const agent = AGENTS[agentId];
+  if (!agent) return;
+  toast(`${agent.name}（${agent.province}）：${agent.role}`);
+}
+
+function showMinister(ministerId) {
+  const minister = MINISTRIES[ministerId];
+  if (!minister) return;
+  toast(`${minister.icon} ${minister.name}：${minister.role}`);
+}
+
+// ==================== 工具函数 ====================
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function showStats() {
+  const data = getData();
+  toast(`总计任务：${data.stats.total} | 已完成：${data.tasks.filter(t => t.status === 'done').length}`);
+}
+
+function clearAll() {
+  if (!confirm('确定清空所有任务？')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  renderTasks();
+  document.getElementById('responsePanel').classList.remove('show');
+  updateFlowChart('submit');
+  toast('已清空');
+}
+
+function exportData() {
+  const data = getData();
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `三省六部_数据_${new Date().toLocaleDateString().replace(/\//g, '-')}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('数据已导出');
+}
+
+// ==================== 初始化 ====================
+renderTasks();
+</script>
+</body>
+</html>
